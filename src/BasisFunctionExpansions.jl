@@ -1,52 +1,6 @@
 module BasisFunctionExpansions
 
-# From LPVSpectral =============================================================
-
-"""basis_activation_func(V,Nv,normalize,coulomb)
-
-Returns a func v->ϕ(v) ∈ ℜ(Nv) that calculates the activation of `Nv` basis functions spread out to cover V nicely. If coulomb is true, then we get twice the number of basis functions, 2Nv
-"""
-function basis_activation_func(V,Nv,normalize,coulomb)
-    if coulomb # If Coulomb setting is activated, double the number of basis functions and clip the activation at zero velocity (useful for data that exhibits a discontinuity at v=0, like coulomb friction)
-        vc      = linspace(0,maximum(abs(V)),Nv+2)
-        vc      = vc[2:end-1]
-        vc      = [-vc[end:-1:1]; vc]
-        Nv      = 2Nv
-        gamma   = Nv/(abs(vc[1]-vc[end]))
-        K       = normalize ? V -> _Kcoulomb_norm(V,vc,gamma) : V -> _Kcoulomb(V,vc,gamma) # Use coulomb basis function instead
-    else
-        vc      = linspace(minimum(V),maximum(V),Nv)
-        gamma   = Nv/(abs(vc[1]-vc[end]))
-        K       = normalize ? V -> _K_norm(V,vc,gamma) : V -> _K(V,vc,gamma)
-    end
-end
-
-
-
-@inline _K(V,vc,gamma) = exp(-gamma*(V.-vc).^2)
-
-@inline function _K_norm(V,vc,gamma)
-    r = _K(V,vc,gamma)
-    r ./=sum(r)
-end
-
-@inline _Kcoulomb(V,vc,gamma) = _K(V,vc,gamma).*(sign(V) .== sign(vc))
-
-@inline function _Kcoulomb_norm(V,vc,gamma)
-    r = _Kcoulomb(V,vc,gamma)
-    r ./=sum(r)
-end
-
-
-
-
 # From Robotlib  ===============================================================
-
-
-function mnorm_pdf(p,c,S)
-    d  = p[:]-c
-    exp(-vecdot(d.^2,S))
-end
 
 function basisParametersNd(p,centers, sigma, velocity::Int=0, normalize=true)
     @assert size(p,2) == length(sigma)
@@ -67,38 +21,6 @@ function basisParametersNd(p,centers, sigma, velocity::Int=0, normalize=true)
     return y
 end
 
-
-function getCenters(n_basis, bounds)
-    # TODO: split centers on velocity dim
-    warn("Not yet split in velocity dimension!")
-    N = length(n_basis);
-    interval = [(bounds[n,2]-bounds[n,1])/(n_basis)[n] for n = 1:N];
-    C = [linspace(bounds[n,1]+interval[n]/2,bounds[n,2]-interval[n]/2,(n_basis)[n]) for n = 1:N];
-
-    Nbasis = prod(n_basis)
-    centers = zeros(N, Nbasis)
-    v = Nbasis
-    h = 1
-    for i = 1:N
-        v = convert(Int64,v / n_basis[i])
-        centers[i,:] = vec(repmat(C[i]',v,h))'
-        h *= n_basis[i]
-    end
-    centers
-end
-
-
-function getCenters(n_basis::Vector{Int64}, q::Matrix{Float64}, q̇::Matrix{Float64})
-    n_joints = size(q,2)
-    minq = minimum([q q̇],1)
-    maxq = maximum([q q̇],1)
-    centers = Array{Matrix{Float64}}(n_joints)
-    for i = 1:n_joints
-        bounds = [minq[[i i+n_joints]]' maxq[[i i+n_joints]]']
-        centers[i] = getCenters(n_basis, bounds)
-    end
-    return centers
-end
 
 
 
@@ -144,8 +66,8 @@ immutable UniformRBFE{1} <: BasisFunctionExpansion{1}
     Supply scheduling signal and number of basis functions for automatic selection of centers and widths
     """
     function RBFE{1}(v::AbstractVector, Nv::Int; normalize=false, coulomb=false)
-        activation, μ, γ = basis_activation_func(v,Nv,normalize,coulomb)
-        new(squared_exponential,μ,γ2σ(γ))
+        activation, μ, γ = basis_activation_func_automatic(v,Nv,normalize,coulomb)
+        new(activation,μ,γ2σ(γ))
     end
 end
 
@@ -163,7 +85,20 @@ squared_exponential_coulomb(v,vc,gamma) = squared_exponential(v,vc,gamma).*(sign
 
 function normalized_squared_exponential_coulomb(v,vc,gamma)
     r = squared_exponential_coulomb(v,vc,gamma)
-    r ./= (sum(r) + 1e-8)
+    r ./= (sum(r,1) + 1e-8)
+end
+
+function squared_exponential(v::AbstractMatrix,vc, sigma, velocity::Int=0)
+    @assert size(v,2) == length(sigma)
+    N_basis = size(vc,2)
+    y       = zeros(N_basis)
+    iSIGMA  = sigma.^-2
+
+    if velocity > 0
+        y = [sign(vc[velocity,i]) == sign(v[velocity]) ? mnorm_pdf(v,vc[:,i],iSIGMA) : 0 for i = 1:N_basis]
+    else
+        y = [mnorm_pdf(v,vc[:,i],iSIGMA) for i = 1:N_basis]
+    end
 end
 
 """basis_activation_func(v,Nv,normalize,coulomb)
@@ -204,12 +139,12 @@ function get_centers_automatic(v::AbstractMatrix, Nv::AbstractVector{Int64}, cou
     dims    = size(v,2)
     minq    = minimum(v,1)
     maxq    = maximum(v,1)
-    N       = length(Nv)
+    dims    = length(Nv)
     Nbasis  = prod(Nv)
-    centers = Array{Float64,3}(N,Nbasis,dims)
+    centers = Array{Float64,3}(dims,dims,Nbasis)
     for i = 1:dims
         bounds = [minq[[i i+dims]]' maxq[[i i+dims]]']
-        centers[:,:,i] = get_centers(bounds, Nv)
+        centers[i,:,:] = get_centers(bounds, Nv)
     end
     return centers
 end
@@ -217,15 +152,15 @@ end
 function get_centers(bounds, Nv, coulomb=false, coulombdims=0)
     # TODO: split centers on velocity dim
     @assert !coulomb "Coulomb not yet supported for multi-dimensional BFEs"
-    N = length(Nv);
-    interval = [(bounds[n,2]-bounds[n,1])/(Nv)[n] for n = 1:N];
-    C = [linspace(bounds[n,1]+interval[n]/2,bounds[n,2]-interval[n]/2,(Nv)[n]) for n = 1:N];
+    dims = length(Nv);
+    interval = [(bounds[n,2]-bounds[n,1])/(Nv)[n] for n = 1:dims];
+    C = [linspace(bounds[n,1]+interval[n]/2,bounds[n,2]-interval[n]/2,(Nv)[n]) for n = 1:dims];
 
-    Nbasis = prod(Nv)
-    centers = zeros(N, Nbasis)
-    v = Nbasis
-    h = 1
-    for i = 1:N
+    Nbasis  = prod(Nv)
+    centers = zeros(dims, Nbasis)
+    v       = Nbasis
+    h       = 1
+    for i = 1:dims
         v = v ÷ Nv[i]
         centers[i,:] = vec(repmat(C[i]',v,h))'
         h *= Nv[i]
@@ -245,6 +180,22 @@ function quadform(x::AbstractVector,A::AbstractVector)
         s += A[i]*x[i]^2
     end
     s
+end
+
+γ2σ(γ) = √(1./(2γ))
+σ2γ(σ) = 1./(2σ.^2)
+
+function meshgrid(a,b)
+    grid_a = [i for i in a, j in b]
+    grid_b = [j for i in a, j in b]
+    grid_a, grid_b
+end
+
+function meshgrid(a,b,c)
+    grid_a = [i for i in a, j in b, k in c]
+    grid_b = [j for i in a, j in b, k in c]
+    grid_c = [k for i in a, j in b, k in c]
+    grid_a, grid_b, grid_c
 end
 
 end # module
