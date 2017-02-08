@@ -5,7 +5,7 @@ using Base.Test
 @test BasisFunctionExpansions.get_centers_automatic(1:10,5,false)[1] |> length == 5
 @test BasisFunctionExpansions.get_centers_automatic(1:10,5,true)[1] |> length == 10
 
-@test BasisFunctionExpansions.get_centers_automatic([1:10 2:11],[5,6])[1] |> size == (5*6,2)
+@test BasisFunctionExpansions.get_centers_automatic([1:10 2:11],[5,6])[1] |> size == (2,5*6)
 
 
 rbf = UniformRBFE(1:3, 5)
@@ -25,3 +25,30 @@ Nv  = [2,3]
 rbf = MultiUniformRBFE(v,Nv)
 @test rbf(randn(2)) |> size == (prod(Nv),)
 @test rbf(randn(10,2)) |> size == (10,prod(Nv))
+
+
+# Single dim
+N    = 1000
+v    = linspace(0,10,N)
+y    = randn(N)
+y    = filt(ones(500)/500,[1],y)
+Nv   = 10
+rbf  = UniformRBFE(v,Nv, normalize=true)
+bfa  = BasisFunctionApproximation(y,v,rbf,1)
+yhat = bfa(v)
+e = y-yhat
+@test std(e) < 0.01
+
+
+# Multidim
+N    = 1000
+x    = linspace(0,2pi-0.2,N)
+v    = [cos(x) sin(x)].*x
+y    = randn(N)
+y    = filt(ones(500)/500,[1],y)
+Nv   = [10,10]
+rbf  = MultiUniformRBFE(v,Nv, normalize=true)
+bfa  = BasisFunctionApproximation(y,v,rbf,0.0001)
+yhat = bfa(v)
+e = y-yhat
+@test std(e) < 0.08

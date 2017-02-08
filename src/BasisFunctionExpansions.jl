@@ -1,6 +1,6 @@
 module BasisFunctionExpansions
 using Base.Test
-export BasisFunctionExpansion, UniformRBFE, MultiUniformRBFE
+export BasisFunctionExpansion, UniformRBFE, MultiUniformRBFE, BasisFunctionApproximation
 
 
 ## Types
@@ -15,6 +15,27 @@ function Base.show(b::BasisFunctionExpansion)
 end
 
 Base.display(b::BasisFunctionExpansion) = show(b)
+
+immutable BasisFunctionApproximation
+    bfe::BasisFunctionExpansion
+    linear_combination::Vector{Float64}
+end
+
+function BasisFunctionApproximation(y::AbstractVector,v,bfe::BasisFunctionExpansion, λ = 0)
+    A = bfe(v)
+    p = size(A,2)
+    if λ == 0
+        x = A\y
+    else
+        x = [A; eye(p)]\[y;zeros(p)]
+    end
+    BasisFunctionApproximation(bfe,x)
+end
+
+function (bfa::BasisFunctionApproximation)(v)
+    A = bfa.bfe(v)
+    return A*bfa.linear_combination
+end
 
 ### UniformRBFE ================================================================
 immutable UniformRBFE <: BasisFunctionExpansion{1}
@@ -169,7 +190,7 @@ function get_centers(bounds, Nv, coulomb=false, coulombdims=0)
         centers[i,:] = vec(repmat(C[i]',v,h))'
         h *= Nv[i]
     end
-    centers, interval
+    centers, 1./interval
 end
 
 ## Utility functions
@@ -209,5 +230,11 @@ end
 
 (b::UniformRBFE)(x) = b.activation(x)
 (b::MultiUniformRBFE)(x) = b.activation(x)
+
+
+
+## Plot tools ==================================================================
+
+# plot
 
 end # module
