@@ -2,6 +2,10 @@
 
 [![Build Status](https://travis-ci.org/baggepinnen/BasisFunctionExpansions.jl.svg?branch=master)](https://travis-ci.org/baggepinnen/BasisFunctionExpansions.jl)
 
+A Julia toolbox for approximation of functions using basis function expansions.
+Currently supported basis functions are
+- Uniform Radial Basis Functions (Gaussian with diagonal covariance matrix)
+
 
 # Usage
 Plotting functionality requires `Plots.jl`
