@@ -21,7 +21,9 @@ immutable BasisFunctionApproximation
     linear_combination::Vector{Float64}
 end
 
-"""BasisFunctionApproximation(y::Vector, v, bfe::BasisFunctionExpansion, λ = 0)
+"""
+    BasisFunctionApproximation(y::Vector, v, bfe::BasisFunctionExpansion, λ = 0)
+
 Perform parameter identification to identify the Function `y = ϕ(v)`, where `ϕ` is a Basis Function Expansion of type `bfe`.
 `λ` is an optional regularization parameter (L² regularization).
 """
@@ -48,14 +50,17 @@ immutable UniformRBFE <: BasisFunctionExpansion{1}
     σ::Float64
 end
 
-"""UniformRBFE(μ::Vector, σ::Float, activation=squared_exponential)
+"""
+    UniformRBFE(μ::Vector, σ::Float, activation=squared_exponential)
 Supply all parameters. OBS! `σ` can not be an integer, must be some kind of AbstractFloat
 """
 function UniformRBFE(μ::AbstractVector, σ::AbstractFloat, activation=squared_exponential)
     UniformRBFE(activation,μ,σ)
 end
 
-"""UniformRBFE(v::Vector, Nv::Int; normalize=false, coulomb=false)
+"""
+    UniformRBFE(v::Vector, Nv::Int; normalize=false, coulomb=false)
+
 Supply scheduling signal and number of basis functions For automatic selection of centers and widths
 """
 function UniformRBFE(v::AbstractVector, Nv::Int; normalize=false, coulomb=false)
@@ -71,7 +76,9 @@ immutable MultiUniformRBFE{N} <: BasisFunctionExpansion{N}
     Σ::Vector{Float64}
 end
 
-"""MultiUniformRBFE(μ::Matrix, Σ::Matrix, activation=squared_exponential)
+"""
+    MultiUniformRBFE(μ::Matrix, Σ::Matrix, activation=squared_exponential)
+
 Supply all parameters.
 """
 function MultiUniformRBFE(μ::AbstractMatrix, Σ::AbstractMatrix, activation=squared_exponential)
@@ -79,7 +86,9 @@ function MultiUniformRBFE(μ::AbstractMatrix, Σ::AbstractMatrix, activation=squ
     MultiUniformRBFE{length(Nv)}(activation,μ,Σ)
 end
 
-"""MultiUniformRBFE(v::AbstractVector, Nv::Vector{Int}; normalize=false, coulomb=false)
+"""
+    MultiUniformRBFE(v::AbstractVector, Nv::Vector{Int}; normalize=false, coulomb=false)
+
 Supply scheduling signal and number of basis functions For automatic selection of centers and widths
 """
 function MultiUniformRBFE(v::AbstractMatrix, Nv::AbstractVector{Int}; normalize=false, coulomb=false)
@@ -133,7 +142,8 @@ function squared_exponential(v::AbstractMatrix,vc, sigma, velocity::Int=0)
     end
 end
 
-"""basis_activation_func_automatic(v,Nv,normalize,coulomb)
+"""
+    basis_activation_func_automatic(v,Nv,normalize,coulomb)
 
 Returns a func v->ϕ(v) ∈ ℜ(Nv) that calculates the activation of `Nv` basis functions spread out to cover v nicely. If coulomb is true, then we get twice the number of basis functions, 2Nv
 """
