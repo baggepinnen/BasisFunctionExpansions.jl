@@ -5,37 +5,57 @@
 A Julia toolbox for approximation of functions using basis function expansions.
 Currently supported basis functions are
 - Uniform Radial Basis Functions (Gaussian with diagonal covariance matrix)
+..- `UniformRBFE, MultiUniformRBFE`
+
+
 
 
 # Usage
+We demonstrate typical usage with some examples.
+
+The idea is to create an object representing an expansion. This object contains information regarding the domain of the expansion, which type of basis functions used and how many. These objects are, once created, callable with a scheduling vector/matrix. A call like this returns a vector/matrix of basis function activations.
+
+To reconstruct a signal, a linear combination of basis functions must be estimated. To facilitate this, a second type of objects are available: `BasisFunctionApproximation`. Once created, `BasisFunctionApproximation`s are callable with a scheduling signal and return a reconstruction thereof. The parameter estimation is performed behind the scene using standard linear regression (least-squares). An optional regularization parameter can be supplied if needed, see `?BasisFunctionApproximation` for help.
+
 Plotting functionality requires `Plots.jl`
-## Single dim
+
+## Single dimension
+We start by simulating a signal `y` and a scheduling signal `v`. The task is to estimate a function `y = ϕ(v)`, where `ϕ` is a basis function expansion.
 ```julia
 N    = 1000
 v    = linspace(0,10,N) # Scheduling signal
 y    = randn(N)         # Signal to be approximated
 y    = filt(ones(500)/500,[1],y)
+```
+
+Next we setup the basis function expansion object `rbf` and use it to create a reconstruction object `bfa`
+```julia
 Nv   = 10               # Number of basis functions
 rbf  = UniformRBFE(v,Nv, normalize=true) # Approximate using radial basis functions with constant width
 bfa  = BasisFunctionApproximation(y,v,rbf,1) # Create approximation object
-yhat = bfa(v) # Reconstruct signal using approximation object
+ŷ = bfa(v) # Reconstruct signal using approximation object
 scatter(v,y, lab="Signal")
-scatter!(v,yhat, lab="Reconstruction")
+scatter!(v,ŷ, lab="Reconstruction")
 ```
 ![window](figs/onedim.png)
 
-## Multidim
+## Multiple dimensions
+We now demonstrate the same thing but with `v ∈ ℜ²`. To create a nice plot, we let `v` form a spiral with increasing radius.
 ```julia
 N    = 1000
 x    = linspace(0,2pi-0.2,N)
 v    = [cos(x) sin(x)].*x # Scheduling signal
 y    = randn(N)         # Signal to be approximated
 y    = filt(ones(500)/500,[1],y)
+```
+
+Now we're creating a two-dimensional basis function expansion using ten functions in each dimension (for a total of 10*10=100 parameters).
+```julia
 Nv   = [10,10]          # Number of basis functions along each dimension
 rbf  = MultiUniformRBFE(v,Nv, normalize=true) # Approximate using radial basis functions with constant width (Not isotropic, but all functions have the same diagonal covariance matrix)
 bfa  = BasisFunctionApproximation(y,v,rbf,0.0001) # Create approximation object
-yhat = bfa(v) # Reconstruct signal using approximation object
+ŷ = bfa(v) # Reconstruct signal using approximation object
 scatter3d(v[:,1],v[:,2],y, lab="Signal")
-scatter3d!(v[:,1],v[:,2],yhat, lab="Reconstruction")
+scatter3d!(v[:,1],v[:,2],ŷ, lab="Reconstruction")
 ```
 ![window](figs/multidim.png)
