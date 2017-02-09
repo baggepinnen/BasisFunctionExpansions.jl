@@ -109,3 +109,20 @@ plot!(rbf)
 plot!(v,bfa(v),lab="Reconstruction",c=:blue,linewidth=2)
 ```
 ![window](figs/singlebase.png)
+
+# Selecting the number of basis functions
+A simple way of choosing the number of basis functions is to plot an L-curve (parameter vs. error). A suitable number is where the kink in the curve occurs, for this example at around 6 basis functions.
+```julia
+N    = 200
+v    = linspace(0,10,N)
+y    = 0.1*(v-2).*(v-7) + 0.2randn(N)
+nvec = 2:100
+lcurve = map(nvec) do n
+  rbf = UniformRBFE(v, n, normalize = true)
+  bfa = BasisFunctionApproximation(y,v,rbf)
+  std(y-bfa(v))
+end
+
+plot(nvec, lcurve, yscale=:log10, ylabel="RMS Error", xlabel="Number of basis functions")
+```
+![window](figs/lcurve.png)
