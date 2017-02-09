@@ -47,7 +47,7 @@ x    = linspace(0,2pi-0.2,N)
 v    = [cos(x) sin(x)].*x
 y    = randn(N)
 y    = filt(ones(500)/500,[1],y)
-Nv   = [5,5]
+Nv   = [10,10]
 rbf  = MultiUniformRBFE(v,Nv, normalize=true)
 bfa  = BasisFunctionApproximation(y,v,rbf,0.0001)
 yhat = bfa(v)

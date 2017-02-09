@@ -74,7 +74,7 @@ scatter3d!(v[:,1],v[:,2],ŷ, lab="Reconstruction")
 ![window](figs/multidim.png)
 
 To visualize also the basis functions, we can simply call `plot!(rbf)` (the exclamation mark adds to the current plot instead of creating a new one).
-Below is an example when a 5x5 BFE is visualized using `plotly` as backend. 
+Below is an example when a 5x5 BFE is visualized using `plotly` as backend.
 
 ![window](figs/multibase.png)
 
@@ -91,3 +91,20 @@ Bagge Carlson, Fredrik; Robertsson, Anders and Johansson, Rolf
 * ["Modeling and Identification of Position and Temperature Dependent Friction Phenomena without Temperature Sensing"
 Bagge Carlson, Fredrik; Robertsson, Anders and Johansson, Rolf
 (2015) IEEE/RSJ International Conference on Intelligent Robots and Systems](http://lup.lub.lu.se/record/7613758)
+
+
+
+# Another example
+
+```julia
+N   = 200
+v   = linspace(0,10,N)
+y   = 0.1*(v-2).*(v-7) + 0.2randn(N)
+rbf = UniformRBFE(v, 5, normalize = true)
+bfa = BasisFunctionApproximation(y,v,rbf)
+
+scatter(v,y,lab="Signal",c=:orange, subplot=1, xlabel="\$v\$", size=(600,300))
+plot!(rbf)
+plot!(v,bfa(v),lab="Reconstruction",c=:blue,linewidth=2)
+```
+![window](figs/singlebase.png)
