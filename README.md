@@ -55,8 +55,9 @@ As we can see from the figure, the linear combination of basis functions forming
 ## Multiple dimensions
 We now demonstrate the same thing but with `v ∈ ℜ²`. To create a nice plot, we let `v` form a spiral with increasing radius.
 ```julia
+using BasisFunctionExpansions
 N = 1000
-x = linspace(0,2pi-0.2,N)
+x = linspace(0,4pi,N)
 v = [cos(x) sin(x)].*x # Scheduling signal
 y = randn(N) # Signal to be approximated
 y = filt(ones(500)/500,[1],y)
@@ -71,7 +72,7 @@ ŷ   = bfa(v) # Reconstruct signal using approximation object
 scatter3d(v[:,1],v[:,2],y, lab="Signal")
 scatter3d!(v[:,1],v[:,2],ŷ, lab="Reconstruction")
 ```
-![window](figs/multidim.png)
+![window](figs/multidim.gif)
 
 To visualize also the basis functions, we can simply call `plot!(rbf)` (the exclamation mark adds to the current plot instead of creating a new one).
 Below is an example when a 5x5 BFE is visualized using `plotly` as backend.
