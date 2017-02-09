@@ -116,7 +116,17 @@ function squared_exponential(v::AbstractMatrix,vc,gamma::AbstractVector)
     a
 end
 
-function normalized_squared_exponential(v,vc,gamma)
+function normalized_squared_exponential(v,vc,gamma::Number)
+    r = squared_exponential(v,vc,gamma)
+    r ./= (sum(r,2) + 1e-8)
+end
+
+function normalized_squared_exponential(v::AbstractVector,vc,gamma::AbstractVector)
+    r = squared_exponential(v,vc,gamma)
+    r ./= (sum(r) + 1e-8)
+end
+
+function normalized_squared_exponential(v::AbstractMatrix,vc,gamma::AbstractVector)
     r = squared_exponential(v,vc,gamma)
     r ./= (sum(r,2) + 1e-8)
 end
@@ -248,7 +258,7 @@ end
 
 
 ## Plot tools ==================================================================
-
+include("plotting.jl")
 # plot
 
 end # module

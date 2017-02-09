@@ -40,15 +40,17 @@ scatter(v,y, lab="Signal")
 scatter!(v,ŷ, lab="Reconstruction")
 ```
 
-For comparison, we can also plot the regular linear regression `y = β + α₁x + α₂x²... αₙxⁿ` for varying orders of `n`.
+For comparison, we can also plot the regular linear regression `y = α₀ + α₁x + α₂x²... αₙxⁿ` for varying orders of `n`.
 
 ```julia
 A = v.^(0:3)'
 ŷ_linreg = [A[:,1:i]*(A[:,1:i]\y) for i=2:4]
 plot!(v,hcat(ŷ_linreg...), lab=["Linear regression order $i" for i=1:3]')
 ```
-
 ![window](figs/onedim.png)
+
+As we can see from the figure, the linear combination of basis functions forming the reconstruction has learnt the overall structure of the signal `y`. To capture more detail, one can try to increase the number of basis functions. The final choice of this number is a tradeoff between reconstruction bias and variance, where a high number of basis functions can model the signal in great detail, but may generalize poorly to unseen data.
+
 
 ## Multiple dimensions
 We now demonstrate the same thing but with `v ∈ ℜ²`. To create a nice plot, we let `v` form a spiral with increasing radius.
@@ -71,6 +73,10 @@ scatter3d!(v[:,1],v[:,2],ŷ, lab="Reconstruction")
 ```
 ![window](figs/multidim.png)
 
+To visualize also the basis functions, we can simply call `plot!(rbf)` (the exclamation mark adds to the current plot instead of creating a new one).
+Below is an example when a 5x5 BFE is visualized using `plotly` as backend. 
+
+![window](figs/multibase.png)
 
 # Learn more
 Functionality in this package is used in the packages
@@ -79,9 +85,9 @@ Functionality in this package is used in the packages
 * [DynamicMovementPrimitives.jl](https://github.com/baggepinnen/DynamicMovementPrimitives.jl)
 
 And in the papers
-* [Linear Parameter-Varying Spectral Decomposition
+* ["Linear Parameter-Varying Spectral Decomposition"
 Bagge Carlson, Fredrik; Robertsson, Anders and Johansson, Rolf
 (2017) American Control Conference Conference](http://lup.lub.lu.se/record/ac32368e-e199-44ff-b76a-36668ac7d595)
-* [Modeling and Identification of Position and Temperature Dependent Friction Phenomena without Temperature Sensing
+* ["Modeling and Identification of Position and Temperature Dependent Friction Phenomena without Temperature Sensing"
 Bagge Carlson, Fredrik; Robertsson, Anders and Johansson, Rolf
 (2015) IEEE/RSJ International Conference on Intelligent Robots and Systems](http://lup.lub.lu.se/record/7613758)

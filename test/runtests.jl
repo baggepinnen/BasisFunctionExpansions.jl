@@ -25,6 +25,7 @@ Nv  = [2,3]
 rbf = MultiUniformRBFE(v,Nv)
 @test rbf(randn(2)) |> size == (prod(Nv),)
 @test rbf(randn(10,2)) |> size == (10,prod(Nv))
+@test isapprox.(sum(rbf(randn(10,2)), 2), 1, atol=1e-7) |> all
 
 
 # Single dim
@@ -46,9 +47,10 @@ x    = linspace(0,2pi-0.2,N)
 v    = [cos(x) sin(x)].*x
 y    = randn(N)
 y    = filt(ones(500)/500,[1],y)
-Nv   = [10,10]
+Nv   = [5,5]
 rbf  = MultiUniformRBFE(v,Nv, normalize=true)
 bfa  = BasisFunctionApproximation(y,v,rbf,0.0001)
 yhat = bfa(v)
 e = y-yhat
 @test std(e) < 0.08
+plot(rbf)
