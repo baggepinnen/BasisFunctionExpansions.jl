@@ -4,7 +4,7 @@
 
 A Julia toolbox for approximation of functions using basis function expansions (BFEs).
 
- BFEs are useful when one wants to estimate an arbitrary/unknown/complicated functional relationship between (in the simple case) two variables, `y` and `v`. In simple linear regression, we might consider a functional relationship `y = ϕ(v) = αv + β`, with parameters `α` and `β`. However, if the function `ϕ` has an arbitrary nonlinar form, it might be hard to come up with suitable basis functions to use for linear regression. This package provides a set of convenient methods to estimate `ϕ(v)` as a linear combination of basis functions, such as radial basis functions, for situations where `v` have a single or multiple dimensions.
+ BFEs are useful when one wants to estimate an arbitrary/unknown/complicated functional relationship between (in the simple case) two variables, `y` and `v`. In simple linear regression, we might consider a functional relationship `y = ϕ(v) = αv + β`, with parameters `α` and `β`. However, if the function `ϕ` has an arbitrary nonlinar form, it might be hard to come up with suitable basis functions to use for linear regression. This package provides a set of convenient methods to estimate `ϕ(v)` as a linear combination of basis functions, such as radial basis functions, for situations where `v` has a single or multiple dimensions.
 
 Currently supported basis functions are
 * Uniform Radial Basis Functions (Gaussian with diagonal covariance matrix)
@@ -40,6 +40,15 @@ ŷ = bfa(v) # Reconstruct signal using approximation object
 scatter(v,y, lab="Signal")
 scatter!(v,ŷ, lab="Reconstruction")
 ```
+
+For comparison, we can also plot the regular linear regression `y = β + α₁x + α₂x²... αₙx^n` for varying orders of `n`.
+
+```julia
+A = v.^(0:3)'
+ŷ_linreg = [A[:,1:i]*(A[:,1:i]\y) for i=2:4]
+plot!(v,hcat(ŷ_linreg...), lab=["Linear regression order $i" for i=1:3]')
+```
+
 ![window](figs/onedim.png)
 
 ## Multiple dimensions
