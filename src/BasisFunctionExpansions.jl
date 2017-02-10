@@ -51,12 +51,14 @@ immutable UniformRBFE <: BasisFunctionExpansion{1}
 end
 
 """
-    UniformRBFE(μ::Vector, σ::Float, activation=squared_exponential)
+    UniformRBFE(μ::Vector, σ::Float, activation)
+
 Supply all parameters. OBS! `σ` can not be an integer, must be some kind of AbstractFloat
 """
-function UniformRBFE(μ::AbstractVector, σ::AbstractFloat, activation=squared_exponential)
-    UniformRBFE(activation,μ,σ)
+function UniformRBFE(μ::AbstractVector, σ::AbstractFloat, activation)
+    UniformRBFE(v->activation(v,μ,σ2γ(σ)),μ,σ)
 end
+# TODO: How useful are these really? activation (v) -> a
 
 """
     UniformRBFE(v::Vector, Nv::Int; normalize=false, coulomb=false)
@@ -77,14 +79,15 @@ immutable MultiUniformRBFE{N} <: BasisFunctionExpansion{N}
 end
 
 """
-    MultiUniformRBFE(μ::Matrix, Σ::Matrix, activation=squared_exponential)
+    MultiUniformRBFE(μ::Matrix, Σ::Matrix, activation)
 
 Supply all parameters.
 """
-function MultiUniformRBFE(μ::AbstractMatrix, Σ::AbstractMatrix, activation=squared_exponential)
+function MultiUniformRBFE(μ::AbstractMatrix, Σ::AbstractMatrix, activation)
     @assert length(Nv) == size(μ,1)
-    MultiUniformRBFE{length(Nv)}(activation,μ,Σ)
+    MultiUniformRBFE{length(Nv)}(v->activation(v,μ,σ2γ(Σ)),μ,Σ)
 end
+# TODO: How useful are these really? activation (v) -> a
 
 """
     MultiUniformRBFE(v::AbstractVector, Nv::Vector{Int}; normalize=false, coulomb=false)
@@ -159,7 +162,8 @@ Returns a func v->ϕ(v) ∈ ℜ(Nv) that calculates the activation of `Nv` basis
 """
 function basis_activation_func_automatic(v,Nv,normalize,coulomb=false)
     vc,gamma = get_centers_automatic(v,Nv,coulomb)
-    K,vc,gamma = basis_activation_func(vc,gamma,normalize,coulomb)
+    K = basis_activation_func(vc,gamma,normalize,coulomb)
+    K,vc,gamma
 end
 
 function basis_activation_func(vc,gamma,normalize,coulomb=false)
@@ -168,7 +172,6 @@ function basis_activation_func(vc,gamma,normalize,coulomb=false)
     else
         K = normalize ? v -> normalized_squared_exponential(v,vc,gamma) : v -> squared_exponential(v,vc,gamma)
     end
-    K,vc,gamma
 end
 
 
@@ -178,10 +181,10 @@ function get_centers_automatic(v::AbstractVector,Nv::Int,coulomb = false)
         vc    = vc[2:end-1]
         vc    = [-vc[end:-1:1]; vc]
         Nv    = 2Nv
-        gamma = Nv/(abs(vc[1]-vc[end]))
+        gamma = (Nv/(abs(vc[1]-vc[end])))^2
     else
         vc    = linspace(minimum(v),maximum(v),Nv)
-        gamma = Nv/(abs(vc[1]-vc[end]))
+        gamma = (Nv/(abs(vc[1]-vc[end])))^2
     end
     vc,gamma
 end
@@ -214,7 +217,7 @@ function get_centers(bounds, Nv, coulomb=false, coulombdims=0)
         centers[i,:] = vec(repmat(C[i]',v,h))'
         h *= Nv[i]
     end
-    centers, 1./interval
+    centers, (1./interval).^2
 end
 
 ## Utility functions
