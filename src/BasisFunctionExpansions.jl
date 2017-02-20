@@ -1,6 +1,6 @@
 module BasisFunctionExpansions
 using Base.Test
-export BasisFunctionExpansion, UniformRBFE, MultiUniformRBFE, BasisFunctionApproximation
+export BasisFunctionExpansion, UniformRBFE, MultiUniformRBFE, BasisFunctionApproximation, get_centers, get_centers_multi, get_centers_automatic, quadform, γ2σ, σ2γ
 
 
 ## Types
@@ -58,7 +58,6 @@ Supply all parameters. OBS! `σ` can not be an integer, must be some kind of Abs
 function UniformRBFE(μ::AbstractVector, σ::AbstractFloat, activation)
     UniformRBFE(v->activation(v,μ,σ2γ(σ)),μ,σ)
 end
-# TODO: How useful are these really? activation (v) -> a
 
 """
     UniformRBFE(v::Vector, Nv::Int; normalize=false, coulomb=false)
@@ -87,7 +86,6 @@ function MultiUniformRBFE(μ::AbstractMatrix, Σ::AbstractMatrix, activation)
     @assert length(Nv) == size(μ,1)
     MultiUniformRBFE{length(Nv)}(v->activation(v,μ,σ2γ(Σ)),μ,Σ)
 end
-# TODO: How useful are these really? activation (v) -> a
 
 """
     MultiUniformRBFE(v::AbstractVector, Nv::Vector{Int}; normalize=false, coulomb=false)
@@ -174,7 +172,9 @@ function basis_activation_func(vc,gamma,normalize,coulomb=false)
     end
 end
 
-
+"""
+    vc,γ = get_centers_automatic(v::AbstractVector,Nv::Int,coulomb = false)
+"""
 function get_centers_automatic(v::AbstractVector,Nv::Int,coulomb = false)
     if coulomb # If Coulomb setting is activated, double the number of basis functions and clip the activation at zero velocity (useful for data that exhibits a discontinuity at v=0, like coulomb friction)
         vc    = linspace(0,maximum(abs(v)),Nv+2)
@@ -189,7 +189,9 @@ function get_centers_automatic(v::AbstractVector,Nv::Int,coulomb = false)
     vc,gamma
 end
 
-
+"""
+    vc,γ = get_centers_automatic(v::AbstractMatrix, Nv::AbstractVector{Int}, coulomb=false, coulombdims=0)
+"""
 function get_centers_automatic(v::AbstractMatrix, Nv::AbstractVector{Int}, coulomb=false, coulombdims=0)
     @assert !coulomb "Coulomb not yet supported for multi-dimensional BFEs"
     @assert size(v,2) == length(Nv) "size(v,2) != length(Nv)"
@@ -200,7 +202,9 @@ function get_centers_automatic(v::AbstractMatrix, Nv::AbstractVector{Int}, coulo
     get_centers(bounds, Nv)
 end
 
-
+"""
+    vc,γ = get_centers(bounds, Nv, coulomb=false, coulombdims=0)
+"""
 function get_centers(bounds, Nv, coulomb=false, coulombdims=0)
     # TODO: split centers on velocity dim
     @assert !coulomb "Coulomb not yet supported for multi-dimensional BFEs"
