@@ -96,7 +96,7 @@ function MultiUniformRBFE(v::AbstractMatrix, Nv::AbstractVector{Int}; normalize=
     @assert !coulomb "Coulomb not yet supported for multi-dimensional BFEs"
     @assert length(Nv) == size(v,2)
     activation, μ, γ = basis_activation_func_automatic(v,Nv,normalize,coulomb)
-    MultiUniformRBFE{length(Nv)}(activation,μ,γ2σ(γ))
+    MultiUniformRBFE{length(Nv)}(activation,μ,γ2σ.(γ))
 end
 
 
@@ -106,13 +106,13 @@ end
 
 ## Squared exponential functions
 
-squared_exponential(v::Real,vc,gamma) = exp(-gamma*(v.-vc).^2)
-squared_exponential(v::AbstractVector,vc,gamma::Number) = exp(-gamma*(v.-vc').^2)
-squared_exponential(v::AbstractVector,vc,gamma::AbstractVector) = exp(-((vc'.-v').^2)*gamma)
+squared_exponential(v::Real,vc,gamma) = exp.(-gamma*(v.-vc).^2)
+squared_exponential(v::AbstractVector,vc,gamma::Number) = exp.(-gamma*(v.-vc').^2)
+squared_exponential(v::AbstractVector,vc,gamma::AbstractVector) = exp.(-((vc'.-v').^2)*gamma)
 function squared_exponential(v::AbstractMatrix,vc,gamma::AbstractVector)
     a = Matrix{Float64}(size(v,1),size(vc,2))
     for i = 1:size(v,1)
-        a[i,:] = exp(-sum(gamma.*(v[i,:].-vc).^2,1))
+        a[i,:] = exp.(-sum(gamma.*(v[i,:].-vc).^2,1))
     end
     a
 end
@@ -177,7 +177,7 @@ end
 """
 function get_centers_automatic(v::AbstractVector,Nv::Int,coulomb = false)
     if coulomb # If Coulomb setting is activated, double the number of basis functions and clip the activation at zero velocity (useful for data that exhibits a discontinuity at v=0, like coulomb friction)
-        vc    = linspace(0,maximum(abs(v)),Nv+2)
+        vc    = linspace(0,maximum(abs.(v)),Nv+2)
         vc    = vc[2:end-1]
         vc    = [-vc[end:-1:1]; vc]
         Nv    = 2Nv

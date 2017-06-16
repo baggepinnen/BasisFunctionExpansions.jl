@@ -1,5 +1,5 @@
 
-using PlotRecipes
+using RecipesBase
 
 @recipe function f(b::UniformRBFE)
     Nv = size(b.μ,1)
