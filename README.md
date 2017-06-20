@@ -7,7 +7,7 @@ A Julia toolbox for approximation of functions using basis function expansions (
 BFEs are useful when one wants to estimate an arbitrary/unknown/complicated functional relationship between (in the simple case) two variables, `y` and `v`. In simple linear regression, we might consider a functional relationship `y = ϕ(v) = αv + β`, with parameters `α` and `β`. However, if the function `ϕ` has an arbitrary nonlinar form, it might be hard to come up with suitable basis functions to use for linear regression. This package provides a set of convenient methods to estimate `ϕ(v)` as a linear combination of basis functions, such as radial basis functions, for situations where `v` has a single or multiple dimensions.
 
 Currently supported basis functions are
-* Uniform Radial Basis Functions (Gaussian with diagonal covariance matrix) `UniformRBFE, MultiUniformRBFE`
+* Uniform Radial Basis Functions (Gaussian with diagonal covariance matrix) `UniformRBFE, MultiUniformRBFE, MultiDiagonalRBFE`
 
 
 
@@ -78,6 +78,18 @@ To visualize also the basis functions, we can simply call `plot!(rbf)` (the excl
 Below is an example when a 5x5 BFE is visualized using `plotly` as backend.
 
 ![window](figs/multibase.png)
+
+
+### Nonuniform covariance
+We can let all centers have different (diagonal) covariance matrices using the type `MultiDiagonalRBFE`. In this case, good center locations and covariances are estimated using K-means clustering. With this strategy, we can usually get away with much fewer basis functions compared to a uniform grid. A drawback is that we must know in advance which area of the scheduling signal space is of interest.
+```julia
+Nc   = 8
+rbf  = BasisFunctionExpansions.MultiDiagonalRBFE(v,Nc, normalize=true)
+bfa  = BasisFunctionApproximation(y,v,rbf,0.0001)
+yhat = bfa(v)
+scatter3d(v[:,1],v[:,2],y, lab="Signal")
+scatter3d!(v[:,1],v[:,2],yhat, lab="Reconstruction")
+```
 
 # Learn more
 Functionality in this package is used in the packages
