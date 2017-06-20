@@ -1,10 +1,9 @@
 module BasisFunctionExpansions
-using Base.Test
 export BasisFunctionExpansion, UniformRBFE, MultiUniformRBFE, BasisFunctionApproximation, get_centers, get_centers_multi, get_centers_automatic, quadform, γ2σ, σ2γ
 
 
 ## Types
-abstract BasisFunctionExpansion{N}
+abstract type BasisFunctionExpansion{N} end
 
 function Base.show(b::BasisFunctionExpansion)
     s = string(typeof(b),"\n")
@@ -16,7 +15,7 @@ end
 
 Base.display(b::BasisFunctionExpansion) = show(b)
 
-immutable BasisFunctionApproximation
+struct BasisFunctionApproximation
     bfe::BasisFunctionExpansion
     linear_combination::Vector{Float64}
 end
@@ -33,7 +32,7 @@ function BasisFunctionApproximation(y::AbstractVector,v,bfe::BasisFunctionExpans
     if λ == 0
         x = A\y
     else
-        x = [A; eye(p)]\[y;zeros(p)]
+        x = [A; λ*eye(p)]\[y;zeros(p)]
     end
     BasisFunctionApproximation(bfe,x)
 end
@@ -44,7 +43,7 @@ function (bfa::BasisFunctionApproximation)(v)
 end
 
 ### UniformRBFE ================================================================
-immutable UniformRBFE <: BasisFunctionExpansion{1}
+struct UniformRBFE <: BasisFunctionExpansion{1}
     activation::Function
     μ::Vector{Float64}
     σ::Float64
@@ -71,20 +70,19 @@ end
 
 
 ### RBFE =======================================================================
-immutable MultiUniformRBFE{N} <: BasisFunctionExpansion{N}
+struct MultiUniformRBFE{N} <: BasisFunctionExpansion{N}
     activation::Function
     μ::Matrix{Float64}
     Σ::Vector{Float64}
 end
 
 """
-    MultiUniformRBFE(μ::Matrix, Σ::Matrix, activation)
+    MultiUniformRBFE(μ::Matrix, Σ::Vector, activation)
 
-Supply all parameters.
+Supply all parameters. Σ is the diagonal of the covariance matrix
 """
-function MultiUniformRBFE(μ::AbstractMatrix, Σ::AbstractMatrix, activation)
-    @assert length(Nv) == size(μ,1)
-    MultiUniformRBFE{length(Nv)}(v->activation(v,μ,σ2γ(Σ)),μ,Σ)
+function MultiUniformRBFE(μ::AbstractMatrix, Σ::AbstractVector, activation)
+    MultiUniformRBFE{size(μ,2)}(v->activation(v,μ,σ2γ(Σ)),μ,Σ)
 end
 
 """
