@@ -1,4 +1,3 @@
-
 using RecipesBase
 
 @recipe function f(b::UniformRBFE)

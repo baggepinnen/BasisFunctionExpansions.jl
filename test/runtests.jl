@@ -55,3 +55,26 @@ e = y-yhat
 @test isapprox.(sum(rbf(randn(10,2)), 2), 1, atol=1e-7) |> all
 @test √(mean(e.^2)) < 0.08
 # plot(rbf)
+
+
+
+# Multidim Diagonal
+using BasisFunctionExpansions
+N    = 1000
+x    = linspace(0,2pi-0.2,N)
+v    = [cos.(x) sin.(x)].*x
+y    = randn(N)
+y    = filt(ones(500)/500,[1],y)
+Nc   = 8
+rbf  = BasisFunctionExpansions.MultiDiagonalRBFE(v,Nc, normalize=true)
+bfa  = BasisFunctionApproximation(y,v,rbf,0.0001)
+yhat = bfa(v)
+e = y-yhat
+√(mean(e.^2))
+
+# @test isapprox.(sum(rbf(randn(10,2)), 2), 1, atol=1e-7) |> all
+@test √(mean(e.^2)) < 0.02
+
+
+# scatter3d(v[:,1],v[:,2],y, lab="Signal")
+# scatter3d!(v[:,1],v[:,2],yhat, lab="Reconstruction")

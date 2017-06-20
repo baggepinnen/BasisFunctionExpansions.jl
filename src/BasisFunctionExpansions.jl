@@ -1,5 +1,7 @@
 module BasisFunctionExpansions
-export BasisFunctionExpansion, UniformRBFE, MultiUniformRBFE, BasisFunctionApproximation, get_centers, get_centers_multi, get_centers_automatic, quadform, γ2σ, σ2γ
+using Clustering
+export BasisFunctionExpansion, UniformRBFE, MultiUniformRBFE, MultiDiagonalRBFE, BasisFunctionApproximation
+export get_centers, get_centers_multi, get_centers_automatic, quadform, γ2σ, σ2γ
 
 
 ## Types
@@ -43,6 +45,9 @@ function (bfa::BasisFunctionApproximation)(v)
 end
 
 ### UniformRBFE ================================================================
+"""
+A Uniform RBFE has the same covariance for all basis functions
+"""
 struct UniformRBFE <: BasisFunctionExpansion{1}
     activation::Function
     μ::Vector{Float64}
@@ -70,6 +75,10 @@ end
 
 
 ### RBFE =======================================================================
+"""
+A `MultiUniformRBFE` has the same diagonal covariance matrix for all basis functions
+See also `MultiDiagonalRBFE`, which has different covariance matrices for all basis functions
+"""
 struct MultiUniformRBFE{N} <: BasisFunctionExpansion{N}
     activation::Function
     μ::Matrix{Float64}
@@ -82,7 +91,7 @@ end
 Supply all parameters. Σ is the diagonal of the covariance matrix
 """
 function MultiUniformRBFE(μ::AbstractMatrix, Σ::AbstractVector, activation)
-    MultiUniformRBFE{size(μ,2)}(v->activation(v,μ,σ2γ(Σ)),μ,Σ)
+    MultiUniformRBFE{size(μ,1)}(v->activation(v,μ,σ2γ(Σ)),μ,Σ)
 end
 
 """
@@ -99,8 +108,38 @@ end
 
 
 
+### RBFE =======================================================================
+"""
+A `MultiDiagonalRBFE` has different diagonal covariance matrices for all basis functions
+See also `MultiUniformRBFE`, which has the same covariance matrix for all basis functions
+"""
+struct MultiDiagonalRBFE{N} <: BasisFunctionExpansion{N}
+    activation::Function
+    μ::Matrix{Float64}
+    Σ::Vector{Vector{Float64}}
+end
 
+"""
+    MultiDiagonalRBFE(μ::Matrix, Σ::Vector{Vector{Float64}}, activation)
 
+Supply all parameters. Σ is the diagonals of the covariance matrices
+"""
+function MultiDiagonalRBFE(μ::AbstractMatrix, Σ::AbstractVector{T}, activation) where T <: AbstractVector
+    MultiDiagonalRBFE{size(μ,1)}(v->activation(v,μ,σ2γ(Σ)),μ,Σ)
+end
+
+"""
+    MultiDiagonalRBFE(v::AbstractVector, nc; normalize=false, coulomb=false)
+
+Supply scheduling signal `v` and numer of centers `nc` For automatic selection of covariance matrices and centers using K-means.
+"""
+function MultiDiagonalRBFE(v::AbstractMatrix, nc; normalize=false, coulomb=false)
+    @assert !coulomb "Coulomb not yet supported for multi-dimensional BFEs"
+    μ, Σ = get_centers_Kmeans(v, nc)
+    μ = hcat(μ...)
+    activation = basis_activation_func(μ,σ2γ(Σ),normalize,coulomb)
+    MultiDiagonalRBFE{size(v,2)}(activation,μ,Σ)
+end
 
 ## Squared exponential functions
 
@@ -111,6 +150,16 @@ function squared_exponential(v::AbstractMatrix,vc,gamma::AbstractVector)
     a = Matrix{Float64}(size(v,1),size(vc,2))
     for i = 1:size(v,1)
         a[i,:] = exp.(-sum(gamma.*(v[i,:].-vc).^2,1))
+    end
+    a
+end
+
+function squared_exponential(v::AbstractMatrix,vc,gamma::AbstractVector{T}) where T <: AbstractVector
+    a = zeros(size(v,1),size(vc,2))
+    for j = 1:size(vc,2)
+        for i = 1:size(v,1)
+            a[i,j] += exp(-gamma[j]⋅(v[i,:].-vc[:,j]).^2)
+        end
     end
     a
 end
@@ -222,6 +271,31 @@ function get_centers(bounds, Nv, coulomb=false, coulombdims=0)
     centers, (1./interval).^2
 end
 
+function get_centers_Kmeans(v, nc::Int)
+    iters = 21
+    n_state = size(v,2)
+    errorvec = zeros(iters)
+    params = Array{Float64}(nc*2*n_state,iters)
+    methods = [:rand;:kmpp]
+    Σ = [zeros(n_state) for i = 1:nc, j = 1:iters]
+    μ = [zeros(n_state) for i = 1:nc, j = 1:iters]
+
+    for iter = 1:iters
+        clusterresult = Clustering.kmeans(v', nc; maxiter=200, display=:none, init=iter<iters ? methods[iter%2+1] : :kmcen)
+        for i = 1:nc
+            si = 1+(i-1)n_state*2
+            μ[i,iter] = clusterresult.centers[:,i]
+            C = cov(v[clusterresult.assignments .== i,:])
+            Σ[i,iter] = 2diag(C)
+        end
+        errorvec[iter] = clusterresult.totalcost
+    end
+    println("Std in errors among initial centers: ", round(std(errorvec),6))
+    ind = indmin(errorvec)
+    return μ[:,ind], Σ[:,ind]
+end
+
+
 ## Utility functions
 
 function quadform(x::AbstractVector,A::AbstractMatrix)
@@ -238,6 +312,14 @@ end
 
 γ2σ(γ) = √(1./(2γ))
 σ2γ(σ) = 1./(2σ.^2)
+
+function γ2σ(γ::Vector{T}) where T <: AbstractVector
+    [√(1./(2γ)) for γi in γ]
+end
+
+function σ2γ(σ::Vector{T}) where T <: AbstractVector
+    [1./(2σi.^2) for σi in σ]
+end
 
 function meshgrid(a::AbstractVector,b::AbstractVector)
     grid_a = [i for i in a, j in b]
@@ -259,6 +341,7 @@ end
 
 (b::UniformRBFE)(x) = b.activation(x)
 (b::MultiUniformRBFE)(x) = b.activation(x)
+(b::MultiDiagonalRBFE)(x) = b.activation(x)
 
 
 
