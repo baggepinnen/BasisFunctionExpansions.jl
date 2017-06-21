@@ -1,6 +1,6 @@
 module BasisFunctionExpansions
 using Clustering
-export BasisFunctionExpansion, UniformRBFE, MultiUniformRBFE, MultiDiagonalRBFE, BasisFunctionApproximation
+export BasisFunctionExpansion, UniformRBFE, MultiUniformRBFE, MultiDiagonalRBFE, MultiRBFE, BasisFunctionApproximation
 export get_centers, get_centers_multi, get_centers_automatic, quadform, γ2σ, σ2γ
 
 
@@ -108,7 +108,7 @@ end
 
 
 
-### RBFE =======================================================================
+## MultiDiagonalRBFE =======================================================================
 """
 A `MultiDiagonalRBFE` has different diagonal covariance matrices for all basis functions
 See also `MultiUniformRBFE`, which has the same covariance matrix for all basis functions
@@ -137,8 +137,43 @@ function MultiDiagonalRBFE(v::AbstractMatrix, nc; normalize=false, coulomb=false
     @assert !coulomb "Coulomb not yet supported for multi-dimensional BFEs"
     μ, Σ = get_centers_Kmeans(v, nc)
     μ = hcat(μ...)
+    Σ = [2diag(Σi) for Σi in Σ] # Heuristically inflate covariance by 2 "On the Kernel Widths in Radial-Basis Function Networks" NABIL BENOUDJIT and MICHEL VERLEYSEN
     activation = basis_activation_func(μ,σ2γ(Σ),normalize,coulomb)
     MultiDiagonalRBFE{size(v,2)}(activation,μ,Σ)
+end
+
+## MultiRBFE =======================================================================
+"""
+A `MultiRBFE` has different diagonal covariance matrices for all basis functions
+See also `MultiUniformRBFE`, which has the same covariance matrix for all basis functions
+"""
+struct MultiRBFE{N} <: BasisFunctionExpansion{N}
+    activation::Function
+    μ::Matrix{Float64}
+    Σ::Vector{Matrix{Float64}}
+end
+
+"""
+    MultiRBFE(μ::Matrix, Σ::Vector{Vector{Float64}}, activation)
+
+Supply all parameters. Σ is the diagonals of the covariance matrices
+"""
+function MultiRBFE(μ::AbstractMatrix, Σ::AbstractVector{T}, activation) where T <: AbstractVector
+    MultiRBFE{size(μ,1)}(v->activation(v,μ,σ2γ(Σ)),μ,Σ)
+end
+
+"""
+    MultiRBFE(v::AbstractVector, nc; normalize=false, coulomb=false)
+
+Supply scheduling signal `v` and numer of centers `nc` For automatic selection of covariance matrices and centers using K-means.
+"""
+function MultiRBFE(v::AbstractMatrix, nc; normalize=false, coulomb=false)
+    @assert !coulomb "Coulomb not yet supported for multi-dimensional BFEs"
+    μ, Σ = get_centers_Kmeans(v, nc)
+    μ = hcat(μ...)
+    Σ .*= 3 # Heuristically inflate covariance by 3 "On the Kernel Widths in Radial-Basis Function Networks" NABIL BENOUDJIT and MICHEL VERLEYSEN
+    activation = basis_activation_func(μ,σ2γ(Σ),normalize,coulomb)
+    MultiRBFE{size(v,2)}(activation,μ,Σ)
 end
 
 ## Squared exponential functions
@@ -159,6 +194,17 @@ function squared_exponential(v::AbstractMatrix,vc,gamma::AbstractVector{T}) wher
     for j = 1:size(vc,2)
         for i = 1:size(v,1)
             a[i,j] += exp(-gamma[j]⋅(v[i,:].-vc[:,j]).^2)
+        end
+    end
+    a
+end
+
+function squared_exponential(v::AbstractMatrix,vc,gamma::AbstractVector{T}) where T <: AbstractMatrix
+    a = zeros(size(v,1),size(vc,2))
+    for j = 1:size(vc,2)
+        for i = 1:size(v,1)
+            d = v[i,:].-vc[:,j]
+            a[i,j] += exp(-quadform(d,gamma[j]))
         end
     end
     a
@@ -277,16 +323,15 @@ function get_centers_Kmeans(v, nc::Int)
     errorvec = zeros(iters)
     params = Array{Float64}(nc*2*n_state,iters)
     methods = [:rand;:kmpp]
-    Σ = [zeros(n_state) for i = 1:nc, j = 1:iters]
+    Σ = [zeros(n_state,n_state) for i = 1:nc, j = 1:iters]
     μ = [zeros(n_state) for i = 1:nc, j = 1:iters]
 
     for iter = 1:iters
         clusterresult = Clustering.kmeans(v', nc; maxiter=200, display=:none, init=iter<iters ? methods[iter%2+1] : :kmcen)
         for i = 1:nc
             si = 1+(i-1)n_state*2
-            μ[i,iter] = clusterresult.centers[:,i]
-            C = cov(v[clusterresult.assignments .== i,:])
-            Σ[i,iter] = 2diag(C)
+            μ[i,iter] .= clusterresult.centers[:,i]
+            Σ[i,iter] .= cov(v[clusterresult.assignments .== i,:])
         end
         errorvec[iter] = clusterresult.totalcost
     end
@@ -314,11 +359,19 @@ end
 σ2γ(σ) = 1./(2σ.^2)
 
 function γ2σ(γ::Vector{T}) where T <: AbstractVector
-    [√(1./(2γ)) for γi in γ]
+    [1./(2γ) for γi in γ]
 end
 
 function σ2γ(σ::Vector{T}) where T <: AbstractVector
-    [1./(2σi.^2) for σi in σ]
+    [1./(2σi) for σi in σ]
+end
+
+function γ2σ(γ::Vector{T}) where T <: AbstractMatrix
+    [inv(2γ) for γi in γ]
+end
+
+function σ2γ(σ::Vector{T}) where T <: AbstractMatrix
+    [inv(2σi) for σi in σ]
 end
 
 function meshgrid(a::AbstractVector,b::AbstractVector)
@@ -339,9 +392,10 @@ end
 #     (b::T)(x) = b.activation(x)
 # end
 
-(b::UniformRBFE)(x) = b.activation(x)
-(b::MultiUniformRBFE)(x) = b.activation(x)
+(b::UniformRBFE)(x)       = b.activation(x)
+(b::MultiUniformRBFE)(x)  = b.activation(x)
 (b::MultiDiagonalRBFE)(x) = b.activation(x)
+(b::MultiRBFE)(x)         = b.activation(x)
 
 
 
