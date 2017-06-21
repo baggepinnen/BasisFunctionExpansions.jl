@@ -17,7 +17,7 @@ We demonstrate typical usage with some examples.
 
 The idea is to create an object representing an expansion. This object contains information regarding the domain of the expansion, which type of basis functions used and how many. These objects are, once created, callable with a scheduling vector/matrix. A call like this returns a vector/matrix of basis function activations.
 
-To reconstruct a signal, a linear combination of basis functions must be estimated. To facilitate this, a second type of objects are available: `BasisFunctionApproximation`. Once created, `BasisFunctionApproximation`s are callable with a scheduling signal and return a reconstruction thereof. The parameter estimation is performed behind the scene using standard linear regression (least-squares). An optional regularization parameter can be supplied if needed, see `?BasisFunctionApproximation` for help.
+To reconstruct a signal, a linear combination of basis functions must be estimated. To facilitate this, a second type of object is available: `BasisFunctionApproximation`. Once created, `BasisFunctionApproximation`s are callable with a scheduling signal and return an estimate of the output. The parameter estimation is performed behind the scenes using standard linear regression (least-squares). An optional regularization parameter can be supplied if needed, see `?BasisFunctionApproximation` for help.
 
 Plotting functionality requires `Plots.jl`
 
