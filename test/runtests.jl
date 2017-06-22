@@ -94,3 +94,27 @@ e = y-yhat
 @test √(mean(e.^2)) < 0.02
 # scatter3d(v[:,1],v[:,2],y, lab="Signal")
 # scatter3d!(v[:,1],v[:,2],yhat, lab="Reconstruction")
+
+
+
+# Dynamics
+using BasisFunctionExpansions
+using Plots; plotly()
+T = 100
+A = [1,2*0.7*1,1]
+B = [10,5]
+u = 1randn(T)
+y = filt(B,A,sqrt.(abs.(u)))
+
+yr,A = getARXregressor(y,u,3,2)
+
+rbf = MultiUniformRBFE(A,[2,2,4,4,4], normalize=true)
+bfa = BasisFunctionApproximation(yr,A,rbf, 1e-4)
+e = √(mean((yr - bfa(A)).^2))
+x = A\yr
+e2 = √(mean((yr - A*x).^2))
+
+plot([yr bfa(A) A*x]); gui()
+
+@test e < e2
+@test e < 0.04

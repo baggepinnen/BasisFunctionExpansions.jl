@@ -2,7 +2,7 @@ module BasisFunctionExpansions
 using Clustering
 export BasisFunctionExpansion, UniformRBFE, MultiUniformRBFE, MultiDiagonalRBFE, MultiRBFE, BasisFunctionApproximation
 export get_centers, get_centers_multi, get_centers_automatic, quadform, γ2σ, σ2γ
-
+export toeplitz, getARregressor, getARXregressor
 
 ## Types
 abstract type BasisFunctionExpansion{N} end
@@ -401,6 +401,7 @@ end
 
 ## Plot tools ==================================================================
 include("plotting.jl")
+include("dynamics.jl")
 # plot
 
 end # module
