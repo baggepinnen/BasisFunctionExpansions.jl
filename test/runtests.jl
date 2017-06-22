@@ -98,8 +98,8 @@ e = y-yhat
 
 
 # Dynamics
-using BasisFunctionExpansions
-using Plots; plotly()
+# using BasisFunctionExpansions
+# using Plots; plotly()
 T = 100
 A = [1,2*0.7*1,1]
 B = [10,5]
@@ -114,7 +114,7 @@ e = √(mean((yr - bfa(A)).^2))
 x = A\yr
 e2 = √(mean((yr - A*x).^2))
 
-plot([yr bfa(A) A*x]); gui()
+# plot([yr bfa(A) A*x]); gui()
 
 @test e < e2
 @test e < 0.04

@@ -96,7 +96,7 @@ scatter3d!(v[:,1],v[:,2],yhat, lab="Reconstruction")
 ### Full covariance
 For the type `MultiRBFE` The covariance matrix and center locations are esimated using K-means.
 ```julia
-Nc   = 8
+Nc   = 8                            # Number of centers/BFs
 rbf  = MultiRBFE(v,Nc, normalize=true)
 bfa  = BasisFunctionApproximation(y,v,rbf,0.0001)
 yhat = bfa(v)
