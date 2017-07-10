@@ -84,7 +84,7 @@ Below is an example when a 5x5 BFE is visualized using `plotly` as backend.
 We can let all centers have different (diagonal) covariance matrices using the type `MultiDiagonalRBFE`. In this case, good center locations and covariances are estimated using K-means clustering. With this strategy, we can usually get away with much fewer basis functions compared to a uniform grid. A drawback is that we must know in advance which area of the scheduling signal space is of interest.
 ```julia
 Nc   = 8
-rbf  = BasisFunctionExpansions.MultiDiagonalRBFE(v,Nc, normalize=true)
+rbf  = MultiDiagonalRBFE(v,Nc, normalize=true)
 bfa  = BasisFunctionApproximation(y,v,rbf,0.0001)
 yhat = bfa(v)
 scatter3d(v[:,1],v[:,2],y, lab="Signal")
