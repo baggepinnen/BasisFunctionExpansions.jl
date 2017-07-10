@@ -1,13 +1,15 @@
 # BasisFunctionExpansions
 
+[![BasisFunctionExpansions](http://pkg.julialang.org/badges/BasisFunctionExpansions_0.6.svg)](http://pkg.julialang.org/?pkg=BasisFunctionExpansions)
 [![Build Status](https://travis-ci.org/baggepinnen/BasisFunctionExpansions.jl.svg?branch=master)](https://travis-ci.org/baggepinnen/BasisFunctionExpansions.jl)
+[![codecov](https://codecov.io/gh/baggepinnen/BasisFunctionExpansions.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/baggepinnen/BasisFunctionExpansions.jl)
 
 A Julia toolbox for approximation of functions using basis function expansions (BFEs).
 
 BFEs are useful when one wants to estimate an arbitrary/unknown/complicated functional relationship between (in the simple case) two variables, `y` and `v`. In simple linear regression, we might consider a functional relationship `y = ϕ(v) = αv + β`, with parameters `α` and `β`. However, if the function `ϕ` has an arbitrary nonlinar form, it might be hard to come up with suitable basis functions to use for linear regression. This package provides a set of convenient methods to estimate `ϕ(v)` as a linear combination of basis functions, such as radial basis functions, for situations where `v` has a single or multiple dimensions.
 
 Currently supported basis functions are
-* Uniform Radial Basis Functions (Gaussian with diagonal covariance matrix) `UniformRBFE, MultiUniformRBFE, MultiDiagonalRBFE`
+* Uniform Radial Basis Functions (Gaussian with diagonal covariance matrix) `UniformRBFE, MultiRBFE, MultiUniformRBFE, MultiDiagonalRBFE`
 
 
 
@@ -17,7 +19,7 @@ We demonstrate typical usage with some examples.
 
 The idea is to create an object representing an expansion. This object contains information regarding the domain of the expansion, which type of basis functions used and how many. These objects are, once created, callable with a scheduling vector/matrix. A call like this returns a vector/matrix of basis function activations.
 
-To reconstruct a signal, a linear combination of basis functions must be estimated. To facilitate this, a second type of objects are available: `BasisFunctionApproximation`. Once created, `BasisFunctionApproximation`s are callable with a scheduling signal and return a reconstruction thereof. The parameter estimation is performed behind the scene using standard linear regression (least-squares). An optional regularization parameter can be supplied if needed, see `?BasisFunctionApproximation` for help.
+To reconstruct a signal, a linear combination of basis functions must be estimated. To facilitate this, a second type of object is available: `BasisFunctionApproximation`. Once created, `BasisFunctionApproximation`s are callable with a scheduling signal and return an estimate of the output. The parameter estimation is performed behind the scenes using standard linear regression (least-squares). An optional regularization parameter can be supplied if needed, see `?BasisFunctionApproximation` for help.
 
 Plotting functionality requires `Plots.jl`
 
@@ -90,6 +92,50 @@ yhat = bfa(v)
 scatter3d(v[:,1],v[:,2],y, lab="Signal")
 scatter3d!(v[:,1],v[:,2],yhat, lab="Reconstruction")
 ```
+
+### Full covariance
+For the type `MultiRBFE` The covariance matrix and center locations are esimated using K-means.
+```julia
+Nc   = 8                            # Number of centers/BFs
+rbf  = MultiRBFE(v,Nc, normalize=true)
+bfa  = BasisFunctionApproximation(y,v,rbf,0.0001)
+yhat = bfa(v)
+scatter3d(v[:,1],v[:,2],y, lab="Signal")
+scatter3d!(v[:,1],v[:,2],yhat, lab="Reconstruction")
+```
+
+## Dynamics modeling
+We can use basis function expansions for identification of elementary, non-linear dynamics models.
+Consider the following dynamical system, with an non-linearity on the input
+`A(z)y = B(z)√(|u|)`
+We can simulate this system using the code
+```julia
+A = [1,2*0.7*1,1] # A(z) coeffs
+B = [10,5]        # B(z) coeffs
+u = randn(100)    # Simulate 100 time steps with Gaussian input
+y = filt(B,A,sqrt.(abs.(u)))
+```
+
+We can now try to fit a regular ARX model to this input-output data
+```julia
+yr,A  = getARXregressor(y,u,3,2) # We assume that we know the system order 3,2
+x     = A\yr                     # Fit using standard least-squares
+e_arx = √(mean((yr - A*x).^2))   # Calculate RMS error (4.2553882233771025)
+plot([yr A*x], lab=["Signal" "ARX prediction"])
+```
+![window](figs/arx.png)
+
+Due to the non-linearity at the input of the system, the linear model fails to fit the data well. Our next attempt is a non-linear model based on BFEs. We select the simplest form of multi-dimensional BFE, `MultiUniformRBFE` and further select to cover the state-space with 2 basis functions along each dimension corresponding to `y`, and 4 basis functions along each dimension corresponding to `u` for a total of 2^2*4^3=256 parameters (4 basis functions is the smallest number that can accurately fit `√(|u|)`). The number of parameters in this case is large compared to the number of data points, we will need some regularization to fit this model properly. The regularization choice is made when forming the `BasisFunctionApproximation` and the strength is determined by the last argument `1e-2` in this case.
+```julia
+bfe   = MultiUniformRBFE(A,[2,2,4,4,4], normalize=true)
+bfa   = BasisFunctionApproximation(yr,A,bfe, 1e-3)
+e_bfe = √(mean((yr - bfa(A)).^2)) # (0.005174261451622258)
+```
+![window](figs/bfe.png)
+
+The non-linear model fits the data much better!
+
+We also note that if we knew in advance that the system is linear with a non-linearity on the input, we could do this in a lightly more efficient way by incorporating lagged values of `y` directly in the regressor, instead of expanding the lagged values of `y` in a BFE.
 
 # Learn more
 Functionality in this package is used in the packages
