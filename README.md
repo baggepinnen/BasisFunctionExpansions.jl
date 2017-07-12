@@ -9,7 +9,7 @@ A Julia toolbox for approximation of functions using basis function expansions (
 BFEs are useful when one wants to estimate an arbitrary/unknown/complicated functional relationship between (in the simple case) two variables, `y` and `v`. In simple linear regression, we might consider a functional relationship `y = ϕ(v) = αv + β`, with parameters `α` and `β`. However, if the function `ϕ` has an arbitrary nonlinar form, it might be hard to come up with suitable basis functions to use for linear regression. This package provides a set of convenient methods to estimate `ϕ(v)` as a linear combination of basis functions, such as radial basis functions, for situations where `v` has a single or multiple dimensions.
 
 Currently supported basis functions are
-* Uniform Radial Basis Functions (Gaussian with diagonal covariance matrix) `UniformRBFE, MultiRBFE, MultiUniformRBFE, MultiDiagonalRBFE`
+* Radial Basis Functions `UniformRBFE, MultiRBFE, MultiUniformRBFE, MultiDiagonalRBFE`
 
 
 
@@ -152,6 +152,25 @@ Bagge Carlson, Fredrik; Robertsson, Anders and Johansson, Rolf
 (2015) IEEE/RSJ International Conference on Intelligent Robots and Systems](http://lup.lub.lu.se/record/7613758)
 
 
+# Gradients
+BasisFunctionExpansions plays nice with [ReverseDiff.jl](https://github.com/JuliaDiff/ReverseDiff.jl)
+
+```julia
+julia> using ReverseDiff
+julia> a = randn(1,2)
+julia> ReverseDiff.gradient(bfa,a) # bfa here comes from the Multi-dim example
+1×2 Array{Float64,2}:
+ 1.29364  -0.536586
+
+julia> h = 0.0001 # Finite difference for validation
+0.0001
+
+julia> [(bfa(a+[h 0]) - bfa(a))/h (bfa(a+[0 h]) - bfa(a))/h]
+1×2 Array{Float64,2}:
+ 1.29363  -0.536488
+```
+
+See `?ReverseDiff.gradient` for tips regarding high performance gradient calculation through preallocation of GradientConfig and prerecording of `bfa`.
 
 # Another example
 
