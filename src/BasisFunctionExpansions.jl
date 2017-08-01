@@ -179,8 +179,8 @@ end
 squared_exponential(v::Real,vc,gamma) = exp.(-gamma*(v.-vc).^2)
 squared_exponential(v::AbstractVector,vc,gamma::Number) = exp.(-gamma*(v.-vc').^2)
 squared_exponential(v::AbstractVector,vc,gamma::AbstractVector) = exp.(-((vc'.-v').^2)*gamma)
-function squared_exponential(v::AbstractMatrix,vc,gamma::AbstractVector)
-    a = Matrix{Float64}(size(v,1),size(vc,2))
+function squared_exponential{T}(v::AbstractMatrix{T},vc,gamma::AbstractVector)
+    a = Matrix{T}(size(v,1),size(vc,2))
     for i = 1:size(v,1)
         a[i,:] = exp.(-sum(gamma.*(v[i,:].-vc).^2,1))
     end
