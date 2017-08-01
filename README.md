@@ -104,7 +104,8 @@ scatter3d(v[:,1],v[:,2],y, lab="Signal")
 scatter3d!(v[:,1],v[:,2],yhat, lab="Reconstruction")
 ```
 
-## Dynamics modeling
+# Dynamics modeling
+## LPV ARX modeling
 We can use basis function expansions for identification of elementary, non-linear dynamics models.
 Consider the following dynamical system, with an non-linearity on the input
 `A(z)y = B(z)√(|u|)`
@@ -136,6 +137,18 @@ e_bfe = √(mean((yr - bfa(A)).^2)) # (0.005174261451622258)
 The non-linear model fits the data much better!
 
 We also note that if we knew in advance that the system is linear with a non-linearity on the input, we could do this in a lightly more efficient way by incorporating lagged values of `y` directly in the regressor, instead of expanding the lagged values of `y` in a BFE.
+
+## LPV State-space modeling
+We can also estimate a state-space model with varying coefficient matrices, i.e. a model on the form
+`x(t+1) = A(v)x(t) + B(v)u(t)`
+
+This is accomplished using the built in convenience functions
+```julia
+nc    = 10                                        # Number of centers
+model = LPVSS(x, u, nc; normalize=true, λ = 1e-3) # Estimate a model
+xh    = model(x,u)                                # Form prediction
+```
+See `?LPVSS` for more details and a runnable example that produces a plot.
 
 # Learn more
 Functionality in this package is used in the packages

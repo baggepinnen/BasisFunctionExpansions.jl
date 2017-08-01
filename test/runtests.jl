@@ -118,3 +118,6 @@ e2 = √(mean((yr - A*x).^2))
 
 @test e < e2
 @test e < 0.04
+
+
+include("test_LPVSS.jl")
