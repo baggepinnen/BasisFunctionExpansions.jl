@@ -153,7 +153,7 @@ Bagge Carlson, Fredrik; Robertsson, Anders and Johansson, Rolf
 
 
 # Gradients
-BasisFunctionExpansions plays nice with [ReverseDiff.jl](https://github.com/JuliaDiff/ReverseDiff.jl)
+BasisFunctionExpansions plays nice with [ReverseDiff.jl](https://github.com/JuliaDiff/ReverseDiff.jl) and [ForwardDiff.jl](https://github.com/JuliaDiff/ForwardDiff.jl)
 
 ```julia
 julia> using ReverseDiff
@@ -169,6 +169,8 @@ julia> [(bfa(a+[h 0]) - bfa(a))/h (bfa(a+[0 h]) - bfa(a))/h]
 1×2 Array{Float64,2}:
  1.29363  -0.536488
 ```
+
+Note: for `ForwardDiff.jl` to work, you have to use `ForwardDiff.jacobian` instead of  `ForwardDiff.gradient`.
 
 See `?ReverseDiff.gradient` for tips regarding high performance gradient calculation through preallocation of GradientConfig and prerecording of `bfa`.
 
