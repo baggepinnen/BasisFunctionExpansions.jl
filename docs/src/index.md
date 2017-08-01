@@ -6,18 +6,18 @@
 
 A Julia toolbox for approximation of functions using basis function expansions (BFEs).
 
-BFEs are useful when one wants to estimate an arbitrary/unknown/complicated functional relationship between (in the simple case) two variables, ``y`` and ``v``. In simple linear regression, we might consider a functional relationship ``y = ϕ(v) = αv + β``, with parameters ``α`` and ``β``. However, if the function ``ϕ`` has an arbitrary nonlinar form, it might be hard to come up with suitable basis functions to use for linear regression. This package provides a set of convenient methods to estimate ``ϕ(v)`` as a linear combination of basis functions, such as radial basis functions, for situations where ``v`` has a single or multiple dimensions.
+BFEs are useful when one wants to estimate an arbitrary/unknown/complicated functional relationship between (in the simple case) two variables, ``y`` and ``v``. In simple linear regression, we might consider a functional relationship ``y = \phi(v) = \alpha v + \beta``, with parameters ``\alpha`` and ``\beta``. However, if the function ``\phi`` has an arbitrary nonlinar form, it might be hard to come up with suitable basis functions to use for linear regression. This package provides a set of convenient methods to estimate ``\phi(v)`` as a linear combination of basis functions, such as radial basis functions, for situations where ``v`` has a single or multiple dimensions.
 
 ```@contents
 ```
 
 # Expansion types
 ```@docs
-BasisFunctionApproximation
 UniformRBFE
 MultiUniformRBFE
 MultiDiagonalRBFE
 MultiRBFE
+BasisFunctionApproximation
 ```
 
 ## Usage
@@ -30,7 +30,7 @@ To reconstruct a signal, a linear combination of basis functions must be estimat
 Plotting functionality requires `Plots.jl`
 
 ### Single dimension
-We start by simulating a signal ``y`` and a scheduling signal ``v``. The task is to estimate a function ``y = ϕ(v)``, where ``ϕ`` is a basis function expansion.
+We start by simulating a signal ``y`` and a scheduling signal ``v``. The task is to estimate a function ``y = \phi(v)``, where ``\phi`` is a basis function expansion.
 ```julia
 N = 1000
 v = linspace(0,10,N) # Scheduling signal
@@ -48,7 +48,7 @@ scatter(v,y, lab="Signal")
 scatter!(v,ŷ, lab="Reconstruction")
 ```
 
-For comparison, we can also plot the regular linear regression ``y = α₀ + α₁x + α₂x²... αₙxⁿ`` for varying orders of ``n``.
+For comparison, we can also plot the regular linear regression ``y = \alpha_0  + \alpha_1 x + \alpha_2 x^2... \alpha_n x^n`` for varying orders of ``n``.
 
 ```julia
 A = v.^(0:3)'
@@ -61,7 +61,7 @@ As we can see from the figure, the linear combination of basis functions forming
 
 
 ### Multiple dimensions
-We now demonstrate the same thing but with ``v ∈ ℜ²``. To create a nice plot, we let ``v`` form a spiral with increasing radius.
+We now demonstrate the same thing but with ``v \in \mathbf{R}^2``. To create a nice plot, we let ``v`` form a spiral with increasing radius.
 ```julia
 using BasisFunctionExpansions
 N = 1000
@@ -125,7 +125,7 @@ end
 
 plot(nvec, lcurve, yscale=:log10, ylabel="RMS Error", xlabel="Number of basis functions")
 ```
-![window](figs/lcurve.png)
+![window](../../figs/lcurve.png)
 
 
 # Dynamics modeling
@@ -148,7 +148,7 @@ x     = A\yr                     # Fit using standard least-squares
 e_arx = √(mean((yr - A*x).^2))   # Calculate RMS error (4.2553882233771025)
 plot([yr A*x], lab=["Signal" "ARX prediction"])
 ```
-![window](figs/arx.png)
+![window](../../figs/arx.png)
 
 Due to the non-linearity at the input of the system, the linear model fails to fit the data well. Our next attempt is a non-linear model based on BFEs. We select the simplest form of multi-dimensional BFE, `MultiUniformRBFE` and further select to cover the state-space with 2 basis functions along each dimension corresponding to ``y``, and 4 basis functions along each dimension corresponding to ``u`` for a total of 2^2*4^3=256 parameters (4 basis functions is the smallest number that can accurately fit ``\sqrt{|u|}``). The number of parameters in this case is large compared to the number of data points, we will need some regularization to fit this model properly. The regularization choice is made when forming the `BasisFunctionApproximation` and the strength is determined by the last argument `1e-2` in this case.
 ```julia
@@ -156,7 +156,7 @@ bfe   = MultiUniformRBFE(A,[2,2,4,4,4], normalize=true)
 bfa   = BasisFunctionApproximation(yr,A,bfe, 1e-3)
 e_bfe = √(mean((yr - bfa(A)).^2)) # (0.005174261451622258)
 ```
-![window](figs/bfe.png)
+![window](../../figs/bfe.png)
 
 The non-linear model fits the data much better!
 
