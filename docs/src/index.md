@@ -9,15 +9,15 @@ A Julia toolbox for approximation of functions using basis function expansions (
 BFEs are useful when one wants to estimate an arbitrary/unknown/complicated functional relationship between (in the simple case) two variables, ``y`` and ``v``. In simple linear regression, we might consider a functional relationship ``y = \phi(v) = \alpha v + \beta``, with parameters ``\alpha`` and ``\beta``. However, if the function ``\phi`` has an arbitrary nonlinar form, it might be hard to come up with suitable basis functions to use for linear regression. This package provides a set of convenient methods to estimate ``\phi(v)`` as a linear combination of basis functions, such as radial basis functions, for situations where ``v`` has a single or multiple dimensions.
 
 ```@contents
+Depth = 3
 ```
 
 # Expansion types
-```@docs
-UniformRBFE
-MultiUniformRBFE
-MultiDiagonalRBFE
-MultiRBFE
-BasisFunctionApproximation
+```@autodocs
+Modules = [BasisFunctionExpansions]
+Order   = [:type,:function]
+Private = false
+Pages   = ["BasisFunctionExpansions.jl"]
 ```
 
 ## Usage
@@ -38,7 +38,7 @@ y = randn(N) # Signal to be approximated
 y = filt(ones(500)/500,[1],y)
 ```
 
-Next, we setup the basis function expansion object ``rbf`` and use it to create a reconstruction object ``bfa``
+Next, we setup the basis function expansion object `rbf` and use it to create a reconstruction object `bfa`
 ```julia
 Nv  = 10 # Number of basis functions
 rbf = UniformRBFE(v,Nv, normalize=true) # Approximate using radial basis functions with constant width
@@ -55,7 +55,7 @@ A = v.^(0:3)'
 ŷ_linreg = [A[:,1:i]*(A[:,1:i]\y) for i=2:4]
 plot!(v,hcat(ŷ_linreg...), lab=["Linear regression order $i" for i=1:3]')
 ```
-![window](../../figs/onedim.png)
+![window](figs/onedim.png)
 
 As we can see from the figure, the linear combination of basis functions forming the reconstruction has learnt the overall structure of the signal `y`. To capture more detail, one can try to increase the number of basis functions. The final choice of this number is a tradeoff between reconstruction bias and variance, where a high number of basis functions can model the signal in great detail, but may generalize poorly to unseen data.
 
@@ -80,12 +80,12 @@ ŷ   = bfa(v) # Reconstruct signal using approximation object
 scatter3d(v[:,1],v[:,2],y, lab="Signal")
 scatter3d!(v[:,1],v[:,2],ŷ, lab="Reconstruction")
 ```
-![window](../../figs/multidim.gif)
+![window](figs/multidim.gif)
 
 To visualize also the basis functions, we can simply call `plot!(rbf)` (the exclamation mark adds to the current plot instead of creating a new one).
 Below is an example when a 5x5 BFE is visualized using `plotly` as backend.
 
-![window](../../figs/multibase.png)
+![window](figs/multibase.png)
 
 
 #### Nonuniform covariance
@@ -125,10 +125,17 @@ end
 
 plot(nvec, lcurve, yscale=:log10, ylabel="RMS Error", xlabel="Number of basis functions")
 ```
-![window](../../figs/lcurve.png)
+![window](figs/lcurve.png)
 
 
 # Dynamics modeling
+```@autodocs
+Modules = [BasisFunctionExpansions]
+Order   = [:type,:function]
+Private = false
+Pages   = ["dynamics.jl"]
+```
+
 ## LPV ARX modeling
 We can use basis function expansions for identification of elementary, non-linear dynamics models.
 Consider the following dynamical system, with an non-linearity on the input
@@ -148,7 +155,7 @@ x     = A\yr                     # Fit using standard least-squares
 e_arx = √(mean((yr - A*x).^2))   # Calculate RMS error (4.2553882233771025)
 plot([yr A*x], lab=["Signal" "ARX prediction"])
 ```
-![window](../../figs/arx.png)
+![window](figs/arx.png)
 
 Due to the non-linearity at the input of the system, the linear model fails to fit the data well. Our next attempt is a non-linear model based on BFEs. We select the simplest form of multi-dimensional BFE, `MultiUniformRBFE` and further select to cover the state-space with 2 basis functions along each dimension corresponding to ``y``, and 4 basis functions along each dimension corresponding to ``u`` for a total of 2^2*4^3=256 parameters (4 basis functions is the smallest number that can accurately fit ``\sqrt{|u|}``). The number of parameters in this case is large compared to the number of data points, we will need some regularization to fit this model properly. The regularization choice is made when forming the `BasisFunctionApproximation` and the strength is determined by the last argument `1e-2` in this case.
 ```julia
@@ -156,7 +163,7 @@ bfe   = MultiUniformRBFE(A,[2,2,4,4,4], normalize=true)
 bfa   = BasisFunctionApproximation(yr,A,bfe, 1e-3)
 e_bfe = √(mean((yr - bfa(A)).^2)) # (0.005174261451622258)
 ```
-![window](../../figs/bfe.png)
+![window](figs/bfe.png)
 
 The non-linear model fits the data much better!
 
@@ -166,10 +173,7 @@ We also note that if we knew in advance that the system is linear with a non-lin
 We can also estimate a state-space model with varying coefficient matrices, i.e. a model on the form
 ``x(t+1) = A(v)x(t) + B(v)u(t)``
 
-This is accomplished using the built in convenience type
-```@doc
-LPVSS
-```
+This is accomplished using the built in convenience type `LPVSS`
 Example:
 ```julia
 nc    = 10                                        # Number of centers
@@ -186,9 +190,11 @@ Functionality in this package is used in the packages
 * [DynamicMovementPrimitives.jl](https://github.com/baggepinnen/DynamicMovementPrimitives.jl)
 
 And in the papers
-* ["Linear Parameter-Varying Spectral Decomposition"
-Bagge Carlson, Fredrik; Robertsson, Anders and Johansson, Rolf
-(2017) American Control Conference Conference](http://lup.lub.lu.se/record/ac32368e-e199-44ff-b76a-36668ac7d595)
-* ["Modeling and Identification of Position and Temperature Dependent Friction Phenomena without Temperature Sensing"
-Bagge Carlson, Fredrik; Robertsson, Anders and Johansson, Rolf
-(2015) IEEE/RSJ International Conference on Intelligent Robots and Systems](http://lup.lub.lu.se/record/7613758)
+* ["Linear Parameter-Varying Spectral Decomposition" Bagge Carlson, Fredrik; Robertsson, Anders and Johansson, Rolf (2017) American Control Conference Conference](http://lup.lub.lu.se/record/ac32368e-e199-44ff-b76a-36668ac7d595)
+* ["Modeling and Identification of Position and Temperature Dependent Friction Phenomena without Temperature Sensing" Bagge Carlson, Fredrik; Robertsson, Anders and Johansson, Rolf (2015) IEEE/RSJ International Conference on Intelligent Robots and Systems](http://lup.lub.lu.se/record/7613758)
+
+
+# Index
+
+```@index
+```
