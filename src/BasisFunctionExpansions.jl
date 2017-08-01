@@ -7,15 +7,13 @@ export toeplitz, getARregressor, getARXregressor
 ## Types
 abstract type BasisFunctionExpansion{N} end
 
-function Base.show(b::BasisFunctionExpansion)
+function Base.show{N}(io::IO,b::BasisFunctionExpansion{N})
     s = string(typeof(b),"\n")
     for fn in fieldnames(b)
         s *= string(fn) * ": " * string(getfield(b,fn)) * "\n"
     end
-    println(s)
+    print(io,s)
 end
-
-Base.display(b::BasisFunctionExpansion) = show(b)
 
 struct BasisFunctionApproximation
     bfe::BasisFunctionExpansion
@@ -46,7 +44,7 @@ end
 
 ### UniformRBFE ================================================================
 """
-A Uniform RBFE has the same covariance for all basis functions
+A Uniform RBFE has the same variance for all basis functions
 """
 struct UniformRBFE <: BasisFunctionExpansion{1}
     activation::Function
