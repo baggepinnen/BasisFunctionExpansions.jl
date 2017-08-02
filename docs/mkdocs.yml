@@ -1,9 +1,9 @@
 site_name:        BasisFunctionExpansions.jl
 repo_url:         https://github.com/baggepinnen/BasisFunctionExpansions.jl
 site_description: Documentation for BasisFunctionExpansions.jl
-site_author:      baggepinnen
+site_author:      Fredri Bagge Carlson
 
-theme: readthedocs
+theme: cinder
 
 extra_css:
   - assets/Documenter.css

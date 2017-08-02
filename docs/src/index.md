@@ -12,15 +12,15 @@ BFEs are useful when one wants to estimate an arbitrary/unknown/complicated func
 Depth = 3
 ```
 
-# Expansion types
+# Exported functions and types
 ```@autodocs
 Modules = [BasisFunctionExpansions]
-Order   = [:type,:function]
 Private = false
 Pages   = ["BasisFunctionExpansions.jl"]
 ```
 
-## Usage
+
+# Usage
 We demonstrate typical usage with some examples.
 
 The idea is to create an object representing an expansion. This object contains information regarding the domain of the expansion, which type of basis functions used and how many. These objects are, once created, callable with a scheduling vector/matrix. A call like this returns a vector/matrix of basis function activations.
@@ -29,7 +29,7 @@ To reconstruct a signal, a linear combination of basis functions must be estimat
 
 Plotting functionality requires `Plots.jl`
 
-### Single dimension
+## Single dimension
 We start by simulating a signal ``y`` and a scheduling signal ``v``. The task is to estimate a function ``y = \phi(v)``, where ``\phi`` is a basis function expansion.
 ```julia
 N = 1000
@@ -59,7 +59,7 @@ plot!(v,hcat(ŷ_linreg...), lab=["Linear regression order $i" for i=1:3]')
 
 As we can see from the figure, the linear combination of basis functions forming the reconstruction has learnt the overall structure of the signal ``y``. To capture more detail, one can try to increase the number of basis functions. The final choice of this number is a tradeoff between reconstruction bias and variance, where a high number of basis functions can model the signal in great detail, but may increase the variance if data is sparse.
 
-#### Plotting
+### Plotting
 `BasisFunctionExpansion` objects can be plotted if `Plots.jl` is loaded. This works for 1 and 2 dimensional expansions only.
 ```julia
 N   = 200
@@ -75,7 +75,7 @@ plot!(v,bfa(v),lab="Reconstruction",c=:blue,linewidth=2)
 ![window](figs/singlebase.png)
 
 
-### Multiple dimensions
+## Multiple dimensions
 We now demonstrate the same thing but with ``v \in \mathbf{R}^2``. To create a nice plot, we let ``v`` form a spiral with increasing radius.
 ```julia
 using BasisFunctionExpansions
@@ -103,7 +103,7 @@ Below is an example when a 5x5 BFE is visualized using `plotly` as backend.
 ![window](figs/multibase.png)
 
 
-#### Nonuniform covariance
+### Nonuniform covariance
 We can let all centers have different (diagonal) covariance matrices using the type `MultiDiagonalRBFE`. In this case, good center locations and covariances are estimated using K-means clustering. With this strategy, we can usually get away with much fewer basis functions compared to a uniform grid. A drawback is that we must know in advance which area of the scheduling signal space is of interest.
 ```julia
 Nc   = 8
@@ -114,7 +114,7 @@ scatter3d(v[:,1],v[:,2],y, lab="Signal")
 scatter3d!(v[:,1],v[:,2],yhat, lab="Reconstruction")
 ```
 
-#### Full covariance
+### Full covariance
 For the type `MultiRBFE` The covariance matrix and center locations are esimated using K-means.
 ```julia
 Nc   = 8                            # Number of centers/BFs
