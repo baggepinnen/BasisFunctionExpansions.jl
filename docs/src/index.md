@@ -210,6 +210,29 @@ nothing # hide
 ```
 ![window](figs/lpvss.png)
 
+
+# Gradients
+BasisFunctionExpansions plays nice with [ReverseDiff.jl](https://github.com/JuliaDiff/ReverseDiff.jl) and [ForwardDiff.jl](https://github.com/JuliaDiff/ForwardDiff.jl)
+
+```jldoctest
+julia> using ReverseDiff
+julia> a = randn(1,2)
+julia> ReverseDiff.gradient(bfa,a) # bfa here comes from the Multi-dim example
+1×2 Array{Float64,2}:
+ 1.29364  -0.536586
+
+julia> h = 0.0001 # Finite difference for validation
+0.0001
+
+julia> [(bfa(a+[h 0]) - bfa(a))/h (bfa(a+[0 h]) - bfa(a))/h]
+1×2 Array{Float64,2}:
+ 1.29363  -0.536488
+```
+
+Note: for `ForwardDiff.jl` to work, you have to use `ForwardDiff.jacobian` instead of  `ForwardDiff.gradient`.
+
+See `?ReverseDiff.gradient` for tips regarding high performance gradient calculation through preallocation of GradientConfig and prerecording of `bfa`.
+
 # Learn more
 Functionality in this package is used in the packages
 * [Robotlib.jl](https://github.com/baggepinnen/Robotlib.jl)
