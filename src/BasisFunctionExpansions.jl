@@ -2,18 +2,18 @@ module BasisFunctionExpansions
 using Clustering
 export BasisFunctionExpansion, UniformRBFE, MultiUniformRBFE, MultiDiagonalRBFE, MultiRBFE, BasisFunctionApproximation
 export get_centers, get_centers_multi, get_centers_automatic, quadform, γ2σ, σ2γ
-export toeplitz, getARregressor, getARXregressor, LPVSS
+export toeplitz, getARregressor, getARXregressor, LPVSS, predict
 
 ## Types
 abstract type BasisFunctionExpansion{N} end
 
-function Base.show{N}(io::IO,b::BasisFunctionExpansion{N})
-    s = string(typeof(b),"\n")
-    for fn in fieldnames(b)
-        s *= string(fn) * ": " * string(getfield(b,fn)) * "\n"
-    end
-    print(io,s)
-end
+# function Base.show{N}(io::IO,b::BasisFunctionExpansion{N})
+#     s = string(typeof(b),"\n")
+#     for fn in fieldnames(b)
+#         s *= string(fn) * ": " * string(getfield(b,fn)) * "\n"
+#     end
+#     print(io,s)
+# end
 
 struct BasisFunctionApproximation
     bfe::BasisFunctionExpansion
@@ -65,6 +65,8 @@ end
     UniformRBFE(v::Vector, Nv::Int; normalize=false, coulomb=false)
 
 Supply scheduling signal and number of basis functions For automatic selection of centers and widths
+
+The keyword `normalize` determines weather or not basis function activations are normalized to sum to one for each datapoint, normalized networks tend to extrapolate better ["The normalized radial basis function neural network" DOI: 10.1109/ICSMC.1998.728118](http://ieeexplore.ieee.org/document/728118/)
 """
 function UniformRBFE(v::AbstractVector, Nv::Int; normalize=false, coulomb=false)
     activation, μ, γ = basis_activation_func_automatic(v,Nv,normalize,coulomb)
@@ -96,6 +98,8 @@ end
     MultiUniformRBFE(v::AbstractVector, Nv::Vector{Int}; normalize=false, coulomb=false)
 
 Supply scheduling signal and number of basis functions For automatic selection of centers and widths
+
+The keyword `normalize` determines weather or not basis function activations are normalized to sum to one for each datapoint, normalized networks tend to extrapolate better ["The normalized radial basis function neural network" DOI: 10.1109/ICSMC.1998.728118](http://ieeexplore.ieee.org/document/728118/)
 """
 function MultiUniformRBFE(v::AbstractMatrix, Nv::AbstractVector{Int}; normalize=false, coulomb=false)
     @assert !coulomb "Coulomb not yet supported for multi-dimensional BFEs"
@@ -130,6 +134,8 @@ end
     MultiDiagonalRBFE(v::AbstractVector, nc; normalize=false, coulomb=false)
 
 Supply scheduling signal `v` and numer of centers `nc` For automatic selection of covariance matrices and centers using K-means.
+
+The keyword `normalize` determines weather or not basis function activations are normalized to sum to one for each datapoint, normalized networks tend to extrapolate better ["The normalized radial basis function neural network" DOI: 10.1109/ICSMC.1998.728118](http://ieeexplore.ieee.org/document/728118/)
 """
 function MultiDiagonalRBFE(v::AbstractMatrix, nc; normalize=false, coulomb=false)
     @assert !coulomb "Coulomb not yet supported for multi-dimensional BFEs"
@@ -164,6 +170,8 @@ end
     MultiRBFE(v::AbstractVector, nc; normalize=false, coulomb=false)
 
 Supply scheduling signal `v` and numer of centers `nc` For automatic selection of covariance matrices and centers using K-means.
+
+The keyword `normalize` determines weather or not basis function activations are normalized to sum to one for each datapoint, normalized networks tend to extrapolate better ["The normalized radial basis function neural network" DOI: 10.1109/ICSMC.1998.728118](http://ieeexplore.ieee.org/document/728118/)
 """
 function MultiRBFE(v::AbstractMatrix, nc; normalize=false, coulomb=false)
     @assert !coulomb "Coulomb not yet supported for multi-dimensional BFEs"
@@ -247,7 +255,9 @@ end
 """
     basis_activation_func_automatic(v,Nv,normalize,coulomb)
 
-Returns a func v->ϕ(v) ∈ ℜ(Nv) that calculates the activation of `Nv` basis functions spread out to cover v nicely. If coulomb is true, then we get twice the number of basis functions, 2Nv
+Returns a func v->ϕ(v) ∈ ℜ(Nv) that calculates the activation of `Nv` basis functions spread out to cover v nicely. If coulomb is true, then we get twice the number of basis functions, `2Nv`, with a hard split at `v=0` (useful to model Coulomb friction). coulomb is not yet fully supported for all expansion types.
+
+The keyword `normalize` determines weather or not basis function activations are normalized to sum to one for each datapoint, normalized networks tend to extrapolate better ["The normalized radial basis function neural network" DOI: 10.1109/ICSMC.1998.728118](http://ieeexplore.ieee.org/document/728118/)
 """
 function basis_activation_func_automatic(v,Nv,normalize,coulomb=false)
     vc,gamma = get_centers_automatic(v,Nv,coulomb)
@@ -315,7 +325,7 @@ function get_centers(bounds, Nv, coulomb=false, coulombdims=0)
     centers, (1./interval).^2
 end
 
-function get_centers_Kmeans(v, nc::Int)
+function get_centers_Kmeans(v, nc::Int; verbose=false)
     iters = 21
     n_state = size(v,2)
     errorvec = zeros(iters)
@@ -333,7 +343,7 @@ function get_centers_Kmeans(v, nc::Int)
         end
         errorvec[iter] = clusterresult.totalcost
     end
-    println("Std in errors among initial centers: ", round(std(errorvec),6))
+    verbose && println("Std in errors among initial centers: ", round(std(errorvec),6))
     ind = indmin(errorvec)
     return μ[:,ind], Σ[:,ind]
 end
@@ -401,5 +411,30 @@ end
 include("plotting.jl")
 include("dynamics.jl")
 # plot
+
+"""
+    x,xm,u,n,m = testdata(T,r=1)
+
+Generate `T` time steps of state-space data where the A-matrix changes from
+`A = [0.95 0.1; 0 0.95]` to `A = [0.5 0.05; 0 0.5]` at time `t=T÷2`
+`x,xm,u,n,m` = (state,noisy state, input, statesize, inputsize)
+`r` is the seed to the random number generator.
+"""
+function testdata(T_,r=1)
+    srand(1)
+    n,m      = 2,1
+    At_      = [0.95 0.1; 0 0.95]
+    Bt_      = reshape([0.2; 1],2,1)
+    u        = randn(1,T_)
+    x        = zeros(n,T_)
+    for t = 1:T_-1
+        if t == T_÷2
+            At_ = [0.5 0.05; 0 0.5]
+        end
+        x[:,t+1] = At_*x[:,t] + Bt_*u[:,t] + 0.2randn(n)
+    end
+    xm = x + 0.2randn(size(x));
+    x',xm',u',n,m
+end
 
 end # module

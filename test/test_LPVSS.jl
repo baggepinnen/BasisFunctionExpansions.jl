@@ -1,6 +1,6 @@
-using Plots, Base.Test
+using Base.Test
 function testdata(T_)
-    srand(1)
+    # srand(1)
 
     n,m      = 2,1
     At_      = [0.95 0.1; 0 0.95]
@@ -17,16 +17,33 @@ function testdata(T_)
     x',xm',u',n,m
 end
 
-x,xm,u,n,m = testdata(1000)
+T = 1000
+x,xm,u,n,m = testdata(T)
 
-nc = 20
+nc = 2
 
-model = BasisFunctionExpansions.LPVSS(x, u, nc; normalize=true, λ = 1e-3)
+model = LPVSS(x, u, nc; normalize=true, λ = 1e-3)
 xh = model(x,u)
 
 eRMS = √(mean((xh[1:end-1,:]-x[2:end,:]).^2))
 println("RMS error: ", eRMS)
-@test eRMS <= 1.1*0.6292304108390538
+@test eRMS <= 0.37
+
+# using Plots
 # plotlyjs(show=true)
-# plot(xh[1:end-1,:], lab="Prediction", c=:red, layout=2)
+# plot(xh[1:end-1,:], lab="Prediction", c=:red, layout=(2,1))
 # plot!(x[2:end,:], lab="True", c=:blue)
+
+nc = 4
+v = 1:T
+model = LPVSS(x, u, v, nc; normalize=true, λ = 1e-3)
+xh = model(x,u,v)
+
+eRMS = √(mean((xh[1:end-1,:]-x[2:end,:]).^2))
+println("RMS error: ", eRMS)
+@test eRMS <= 0.26
+
+using Plots
+plotlyjs(show=true)
+plot(xh[1:end-1,:], lab="Prediction", c=:red, layout=(2,1))
+plot!(x[2:end,:], lab="True", c=:blue)

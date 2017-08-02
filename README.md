@@ -53,7 +53,7 @@ plot!(v,hcat(ŷ_linreg...), lab=["Linear regression order $i" for i=1:3]')
 ```
 ![window](figs/onedim.png)
 
-As we can see from the figure, the linear combination of basis functions forming the reconstruction has learnt the overall structure of the signal `y`. To capture more detail, one can try to increase the number of basis functions. The final choice of this number is a tradeoff between reconstruction bias and variance, where a high number of basis functions can model the signal in great detail, but may generalize poorly to unseen data.
+As we can see from the figure, the linear combination of basis functions forming the reconstruction has learnt the overall structure of the signal `y`. To capture more detail, one can try to increase the number of basis functions. The final choice of this number is a tradeoff between reconstruction bias and variance, where a high number of basis functions can model the signal in great detail, but may increase the variance if data is sparse.
 
 
 ## Multiple dimensions
@@ -109,7 +109,7 @@ scatter3d!(v[:,1],v[:,2],yhat, lab="Reconstruction")
 # Dynamics modeling
 ## LPV ARX modeling
 We can use basis function expansions for identification of elementary, non-linear dynamics models.
-Consider the following dynamical system, with an non-linearity on the input
+Consider the following dynamical system, with a non-linearity on the input
 `A(z)y = B(z)√(|u|)`
 We can simulate this system using the code
 ```julia
@@ -128,7 +128,7 @@ plot([yr A*x], lab=["Signal" "ARX prediction"])
 ```
 ![window](figs/arx.png)
 
-Due to the non-linearity at the input of the system, the linear model fails to fit the data well. Our next attempt is a non-linear model based on BFEs. We select the simplest form of multi-dimensional BFE, `MultiUniformRBFE` and further select to cover the state-space with 2 basis functions along each dimension corresponding to `y`, and 4 basis functions along each dimension corresponding to `u` for a total of 2^2*4^3=256 parameters (4 basis functions is the smallest number that can accurately fit `√(|u|)`). The number of parameters in this case is large compared to the number of data points, we will need some regularization to fit this model properly. The regularization choice is made when forming the `BasisFunctionApproximation` and the strength is determined by the last argument `1e-2` in this case.
+Due to the non-linearity at the input of the system, the linear model fails to fit the data well. Our next attempt is a non-linear model based on BFEs. We select the simplest form of multi-dimensional BFE, `MultiUniformRBFE` and further select to cover the state-space with 2 basis functions along each dimension corresponding to `y`, and 4 basis functions along each dimension corresponding to `u` for a total of 2^2*4^3=256 parameters (4 basis functions is the smallest number that can somewhat accurately fit `√(|u|)`). The number of parameters in this case is large compared to the number of data points, we will need some regularization to fit this model properly. The regularization choice is made when forming the `BasisFunctionApproximation` and the strength is determined by the last argument `1e-3` in this case.
 ```julia
 bfe   = MultiUniformRBFE(A,[2,2,4,4,4], normalize=true)
 bfa   = BasisFunctionApproximation(yr,A,bfe, 1e-3)
@@ -138,7 +138,7 @@ e_bfe = √(mean((yr - bfa(A)).^2)) # (0.005174261451622258)
 
 The non-linear model fits the data much better!
 
-We also note that if we knew in advance that the system is linear with a non-linearity on the input, we could do this in a lightly more efficient way by incorporating lagged values of `y` directly in the regressor, instead of expanding the lagged values of `y` in a BFE.
+We also note that if we knew in advance that the system is linear with a non-linearity on the input, we could do this in a slightly more efficient way by incorporating lagged values of `y` directly in the regressor, instead of expanding the lagged values of `y` in a BFE. If we knew the exact non-linearity, we could simply transform our measured signal `u` and use it as input. With the LPV model, however, we can estimate the shape of the non-linearity.
 
 ## LPV State-space modeling
 We can also estimate a state-space model with varying coefficient matrices, i.e. a model on the form

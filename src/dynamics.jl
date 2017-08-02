@@ -18,7 +18,7 @@ end
 """
     y,A = getARregressor(y::AbstractVector,na::Integer)
 
-Returns a shortened output signal `y` and a regressor matrix `A` such that the least-squares AR model estimate of order `na` is `y\A`
+Returns a shortened output signal `y` and a regressor matrix `A` such that the least-squares AR model estimate of order `na` is `y\\A`
 """
 function getARregressor(y::AbstractVector,na)
     A = toeplitz(y[na+1:end],y[na+1:-1:1])
@@ -30,12 +30,12 @@ end
 """
     getARXregressor(y::AbstractVector,u::AbstractVecOrMat, na, nb)
 
-Returns a shortened output signal `y` and a regressor matrix `A` such that the least-squares ARX model estimate of order `na,nb` is `y\A` 
+Returns a shortened output signal `y` and a regressor matrix `A` such that the least-squares ARX model estimate of order `na,nb` is `y\\A`
 
 Return a regressor matrix used to fit an ARX model on, e.g., the form
 `A(z)y = B(z)f(u)`
 with output `y` and input `u` where the order of autoregression is `na` and
-input moving average is `nb`
+the order of input moving average is `nb`
 
 # Example
 Here we test the model with the Function `f(u) = √(|u|)`
@@ -50,7 +50,7 @@ bfa   = BasisFunctionApproximation(yr,A,bfe, 1e-3)
 e_bfe = √(mean((yr - bfa(A)).^2)) # (0.005174261451622258)
 plot([yr bfa(A)], lab=["Signal" "Prediction"])
 ```
-See README for more details
+See README (`?BasisFunctionExpansions`) for more details
 """
 function getARXregressor(y::AbstractVector,u::AbstractVecOrMat, na, nb)
     assert(length(nb) == size(u,2))
@@ -74,71 +74,151 @@ function matricesn(x,u)
     y,A
 end
 
+"Convenience tyoe for estimation of LPV state-space models"
+struct LPVSS
+    bfe::BasisFunctionExpansion
+    params
+end
+
+Base.show(io::IO, model::LPVSS) = print(io,"LPVSS model with $(typeof(model.bfe)) and $(length(model.params)*length(model.params[1])) parameters")
+
 """
     LPVSS(x, u, nc; normalize=true, λ = 1e-3)
 
 Linear Parameter-Varying State-space model. Estimate a state-space model with
-varying coefficient matrices `x(t+1) = A(v)x(t) + B(v)u(t)`. Internally a `MultiRBFE` is used. `x` and `u` should have time in first dimension. Centers are found
+varying coefficient matrices `x(t+1) = A(v)x(t) + B(v)u(t)`. Internally a `MultiRBFE` spanning the space of `X × U` is used. `x` and `u` should have time in first dimension. Centers are found
 automatically using k-means, see `MultiRBFE`.
 
-# Example usage
-```julia
-using Plots
-function testdata(T_)
-    srand(1)
-
-    n,m      = 2,1
-    At_      = [0.95 0.1; 0 0.95]
-    Bt_      = reshape([0.2; 1],2,1)
-    u        = randn(1,T_)
-    x        = zeros(n,T_)
-    for t = 1:T_-1
-        if t == T_÷2
-            At_ = [0.5 0.05; 0 0.5]
-        end
-        x[:,t+1] = At_*x[:,t] + Bt_*u[:,t] + 0.2randn(n)
-    end
-    xm = x + 0.2randn(size(x));
-    x',xm',u',n,m
-end
-
-x,xm,u,n,m = testdata(1000)
+# Examples
+```jldoctest
+using Plots, BasisFunctionExpansions
+x,xm,u,n,m = BasisFunctionExpansions.testdata(1000)
 nc         = 10 # Number of centers
 model      = LPVSS(x, u, nc; normalize=true, λ = 1e-3) # Estimate a model
 xh         = model(x,u) # Form prediction
 
-println("RMS error: ", √(mean((xh[1:end-1,:]-x[2:end,:]).^2)))
+eRMS       = √(mean((xh[1:end-1,:]-x[2:end,:]).^2))
 
 plot(xh[1:end-1,:], lab="Prediction", c=:red, layout=2)
 plot!(x[2:end,:], lab="True", c=:blue); gui()
+eRMS <= 0.37
+
+# output
+
+true
 ```
 """
-struct LPVSS
-    bfe::BasisFunctionExpansion
-    bfas::Vector{BasisFunctionApproximation}
-end
-
 function LPVSS(x, u, nc; normalize=true, λ = 1e-3)
     y,A  = matricesn(x,u)
     bfe  = MultiRBFE(A, nc; normalize=normalize) # A is sched/regressor matrix
-    bfas = mapslices(y->BasisFunctionApproximation(y,A,bfe, λ), y, 1)[:]
-    LPVSS(bfe, bfas)
+    params = fit_ss(y,A,A,bfe,λ)
+    LPVSS(bfe, params)
 end
 
+"""
+    LPVSS(x, u, v, nc; normalize=true, λ = 1e-3)
+
+Linear Parameter-Varying State-space model. Estimate a state-space model with
+varying coefficient matrices `x(t+1) = A(v)x(t) + B(v)u(t)`. Internally a `MultiRBFE` or `UniformRBFE` spanning the space of `v` is used, depending on the dimensionality of `v`. `x`, `u` and `v` should have time in first dimension. Centers are found
+automatically using k-means, see `MultiRBFE`.
+
+# Examples
+```jldoctest
+using Plots, BasisFunctionExpansions
+T          = 1000
+x,xm,u,n,m = BasisFunctionExpansions.testdata(T)
+nc         = 4
+v          = 1:T
+model      = LPVSS(x, u, v, nc; normalize=true, λ = 1e-3)
+xh         = model(x,u,v)
+
+eRMS       = √(mean((xh[1:end-1,:]-x[2:end,:]).^2))
+
+plot(xh[1:end-1,:], lab="Prediction", c=:red, layout=(2,1))
+plot!(x[2:end,:], lab="True", c=:blue); gui()
+eRMS <= 0.26
+
+# output
+
+true
+```
+"""
+function LPVSS(x, u, v::AbstractVecOrMat, nc; normalize=true, λ = 1e-3)
+    y,A  = matricesn(x,u) # A is sched matrix
+    if isa(v,AbstractMatrix)
+        bfe  = MultiRBFE(v, nc; normalize=normalize)
+    else
+        bfe  = UniformRBFE(v, nc; normalize=normalize)
+    end
+    params = fit_ss(y,A,v,bfe,λ)
+    LPVSS(bfe, params)
+end
+
+function mega_regressor(bfe,v,A)
+    nc = length(bfe.μ) ÷ supertype(typeof(bfe)).parameters[1]
+    ϕ = bfe(v)
+    ϕ = repmat(ϕ,1,size(A,2)) # Extend activations from nc to nc×(n+m)
+    ϕ = ϕ.* repmat(A,1,nc)  # Extend regressor from n+m to nc×(n+m)
+end
+
+shorten_v(v::AbstractVector) = v[1:end-1]
+shorten_v(v::AbstractMatrix) = v[1:end-1,:]
+
+function fit_ss(y,A,v,bfe,λ)
+    if size(v,1) > size(A,1)
+        v = shorten_v(v)
+    end
+    ϕ = mega_regressor(bfe,v,A)
+    p = size(ϕ,2)
+    params = mapslices(y,1) do y
+        if λ == 0
+            x = ϕ\y
+        else
+            x = [ϕ; λ*eye(p)]\[y;zeros(p)]
+        end
+    end
+    # We now have n vectors of nc(n+m) parameters = nc(n+m)×n
+    return params
+end
+
+"""
+    predict(model::LPVSS, x::AbstractMatrix, u)
+
+Return a prediction of the output `x'` given the state `x` and input `u`
+This function is called when a `model::LPVSS` object is called like `model(x,u)`
+"""
 function predict(model::LPVSS, x::AbstractMatrix, u)
+    v = [x u]
+    predict(model, x, u, v)
+end
+
+"""
+    predict(model::LPVSS, x, u, v)
+
+Return a prediction of the output `x'` given the state `x`, input `u` and
+scheduling parameter `v`
+This function is called when a `model::LPVSS` object is called like `model(x,u,v)`
+"""
+function predict(model::LPVSS, x::AbstractMatrix, u, v)
     A = [x u]
+    ϕ = mega_regressor(model.bfe,v,A)
     y = similar(x)
     for i = 1:size(y,2)
-        y[:,i] = model.bfas[i](A)
+        y[:,i] = ϕ*model.params[:,i]
     end
     y
 end
 
-function predict(model::LPVSS, x::AbstractVector, u)
+function predict(model::LPVSS, x::AbstractVector, u, v)
     A = [x' u']
+    ϕ = mega_regressor(model.bfe,v,A)
     y = map(1:length(x)) do i
-        model.bfas[i](A)
+        vecdot(ϕ,model.params[i])
     end
 end
 
-(model::LPVSS)(x,u) = predict(model, x, u)
+
+(model::LPVSS)(x,u)                 = predict(model, x, u)
+(model::LPVSS)(x,u,v)               = predict(model, x, u, v)
+(model::LPVSS)(x::AbstractMatrix,u) = predict(model, x, u, [x u])
+(model::LPVSS)(x::AbstractVector,u) = predict(model, x, u, [x' u'])
