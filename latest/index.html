@@ -1,139 +1,160 @@
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Documentation for BasisFunctionExpansions.jl">
-  <meta name="author" content="baggepinnen">
-  <link rel="shortcut icon" href="./img/favicon.ico">
-  <title>Home - BasisFunctionExpansions.jl</title>
-  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+<html lang="en">
 
-  <link rel="stylesheet" href="./css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="./css/theme_extra.css" type="text/css" />
-  <link rel="stylesheet" href="./css/highlight.css">
-  <link href="./assets/Documenter.css" rel="stylesheet">
-  
-  <script>
-    // Current page data
-    var mkdocs_page_name = "Home";
-    var mkdocs_page_input_path = "index.md";
-    var mkdocs_page_url = "/";
-  </script>
-  
-  <script src="./js/jquery-2.1.1.min.js"></script>
-  <script src="./js/modernizr-2.8.3.min.js"></script>
-  <script type="text/javascript" src="./js/highlight.pack.js"></script> 
-  
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Documentation for BasisFunctionExpansions.jl"> 
+    <meta name="author" content="Fredri Bagge Carlson">  
+    <link rel="shortcut icon" href="./img/favicon.ico">
+
+    <title>BasisFunctionExpansions.jl</title>
+
+    <link href="./css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/font-hack/2.018/css/hack.min.css">
+    <link href='//fonts.googleapis.com/css?family=PT+Sans:400,400italic,700,700italic&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="./css/base.css" rel="stylesheet">
+    <link href="./css/cinder.css" rel="stylesheet">
+    <link rel="stylesheet" href="./css/highlight.css">
+
+
+    <link href="./assets/Documenter.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js"></script>
+    <script>
+    WebFont.load({
+        google: {
+            families: ['Open Sans', 'PT Sans']
+        }
+    });
+    </script>
+
+    
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="homepage" >
 
-  <div class="wy-grid-for-nav">
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
 
-    
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
-      <div class="wy-side-nav-search">
-        <a href="." class="icon icon-home"> BasisFunctionExpansions.jl</a>
-        <div role="search">
-  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-  </form>
-</div>
-      </div>
-
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-	<ul class="current">
-	  
-          
-            <li class="toctree-l1 current">
-		
-    <a class="current" href=".">Home</a>
-    <ul class="subnav">
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
             
-    <li class="toctree-l2"><a href="#basisfunctionexpansions">BasisFunctionExpansions</a></li>
-    
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
 
-    <li class="toctree-l2"><a href="#expansion-types">Expansion types</a></li>
-    
-        <ul>
-        
-            <li><a class="toctree-l3" href="#usage">Usage</a></li>
-        
-        </ul>
-    
+            <!-- Main title -->
+            <a class="navbar-brand" href=".">BasisFunctionExpansions.jl</a>
+        </div>
 
-    <li class="toctree-l2"><a href="#selecting-the-number-of-basis-functions">Selecting the number of basis functions</a></li>
-    
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+            
 
-    <li class="toctree-l2"><a href="#dynamics-modeling">Dynamics modeling</a></li>
-    
-        <ul>
-        
-            <li><a class="toctree-l3" href="#lpv-arx-modeling">LPV ARX modeling</a></li>
-        
-            <li><a class="toctree-l3" href="#lpv-state-space-modeling">LPV State-space modeling</a></li>
-        
-        </ul>
-    
-
-    <li class="toctree-l2"><a href="#learn-more">Learn more</a></li>
-    
-
-    <li class="toctree-l2"><a href="#index">Index</a></li>
-    
-
-    </ul>
-	    </li>
-          
-        </ul>
-      </div>
-      &nbsp;
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href=".">BasisFunctionExpansions.jl</a>
-      </nav>
-
-      
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="breadcrumbs navigation">
-  <ul class="wy-breadcrumbs">
-    <li><a href=".">Docs</a> &raquo;</li>
-    
-      
-    
-    <li>Home</li>
-    <li class="wy-breadcrumbs-aside">
-      
-        <a href="https://github.com/baggepinnen/BasisFunctionExpansions.jl/edit/master/docs/index.md"
-          class="icon icon-github"> Edit on GitHub</a>
-      
-    </li>
-  </ul>
-  <hr/>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                        <i class="fa fa-search"></i> Search
+                    </a>
+                </li>
+                
+                
+                    <li>
+                        <a href="https://github.com/baggepinnen/BasisFunctionExpansions.jl">
+                            
+                                <i class="fa fa-github"></i>
+                            
+                            GitHub
+                        </a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
 </div>
-          <div role="main">
-            <div class="section">
-              
-                <p><a id='BasisFunctionExpansions-1'></a></p>
+
+    <div class="container">
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="first-level active"><a href="#basisfunctionexpansions">BasisFunctionExpansions</a></li>
+        
+    
+        <li class="first-level "><a href="#exported-functions-and-types">Exported functions and types</a></li>
+        
+    
+        <li class="first-level "><a href="#usage">Usage</a></li>
+        
+            <li class="second-level"><a href="#single-dimension">Single dimension</a></li>
+            
+                <li class="third-level"><a href="#plotting">Plotting</a></li>
+            
+        
+            <li class="second-level"><a href="#multiple-dimensions">Multiple dimensions</a></li>
+            
+                <li class="third-level"><a href="#nonuniform-covariance">Nonuniform covariance</a></li>
+            
+                <li class="third-level"><a href="#full-covariance">Full covariance</a></li>
+            
+        
+    
+        <li class="first-level "><a href="#selecting-the-number-of-basis-functions">Selecting the number of basis functions</a></li>
+        
+    
+        <li class="first-level "><a href="#dynamics-modeling">Dynamics modeling</a></li>
+        
+            <li class="second-level"><a href="#lpv-arx-modeling">LPV ARX modeling</a></li>
+            
+        
+            <li class="second-level"><a href="#lpv-state-space-modeling">LPV State-space modeling</a></li>
+            
+        
+    
+        <li class="first-level "><a href="#gradients">Gradients</a></li>
+        
+    
+        <li class="first-level "><a href="#learn-more">Learn more</a></li>
+        
+    
+        <li class="first-level "><a href="#index">Index</a></li>
+        
+    
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<p><a id='BasisFunctionExpansions-1'></a></p>
 <h1 id="basisfunctionexpansions">BasisFunctionExpansions</h1>
 <p><a href="http://pkg.julialang.org/?pkg=BasisFunctionExpansions"><img alt="BasisFunctionExpansions" src="http://pkg.julialang.org/badges/BasisFunctionExpansions_0.6.svg" /></a> <a href="https://travis-ci.org/baggepinnen/BasisFunctionExpansions.jl"><img alt="Build Status" src="https://travis-ci.org/baggepinnen/BasisFunctionExpansions.jl.svg?branch=master" /></a> <a href="https://codecov.io/gh/baggepinnen/BasisFunctionExpansions.jl"><img alt="codecov" src="https://codecov.io/gh/baggepinnen/BasisFunctionExpansions.jl/branch/master/graph/badge.svg" /></a></p>
 <p>A Julia toolbox for approximation of functions using basis function expansions (BFEs).</p>
 <p>BFEs are useful when one wants to estimate an arbitrary/unknown/complicated functional relationship between (in the simple case) two variables, <script type="math/tex">y</script> and <script type="math/tex">v</script>. In simple linear regression, we might consider a functional relationship <script type="math/tex">y = \phi(v) = \alpha v + \beta</script>, with parameters <script type="math/tex">\alpha</script> and <script type="math/tex">\beta</script>. However, if the function <script type="math/tex">\phi</script> has an arbitrary nonlinar form, it might be hard to come up with suitable basis functions to use for linear regression. This package provides a set of convenient methods to estimate <script type="math/tex">\phi(v)</script> as a linear combination of basis functions, such as radial basis functions, for situations where <script type="math/tex">v</script> has a single or multiple dimensions.</p>
 <ul>
 <li><a href=".#BasisFunctionExpansions-1">BasisFunctionExpansions</a></li>
-<li><a href=".#Expansion-types-1">Expansion types</a><ul>
+<li><a href=".#Exported-functions-and-types-1">Exported functions and types</a></li>
 <li><a href=".#Usage-1">Usage</a><ul>
-<li><a href=".#Single-dimension-1">Single dimension</a></li>
-<li><a href=".#Multiple-dimensions-1">Multiple dimensions</a></li>
+<li><a href=".#Single-dimension-1">Single dimension</a><ul>
+<li><a href=".#Plotting-1">Plotting</a></li>
+</ul>
+</li>
+<li><a href=".#Multiple-dimensions-1">Multiple dimensions</a><ul>
+<li><a href=".#Nonuniform-covariance-1">Nonuniform covariance</a></li>
+<li><a href=".#Full-covariance-1">Full covariance</a></li>
 </ul>
 </li>
 </ul>
@@ -144,29 +165,87 @@
 <li><a href=".#LPV-State-space-modeling-1">LPV State-space modeling</a></li>
 </ul>
 </li>
+<li><a href=".#Gradients-1">Gradients</a></li>
 <li><a href=".#Learn-more-1">Learn more</a></li>
 <li><a href=".#Index-1">Index</a></li>
 </ul>
-<p><a id='Expansion-types-1'></a></p>
-<h1 id="expansion-types">Expansion types</h1>
+<p><a id='Exported-functions-and-types-1'></a></p>
+<h1 id="exported-functions-and-types">Exported functions and types</h1>
+<p><a id='BasisFunctionExpansions.MultiDiagonalRBFE' href='#BasisFunctionExpansions.MultiDiagonalRBFE'>#</a>
+<strong><code>BasisFunctionExpansions.MultiDiagonalRBFE</code></strong> &mdash; <em>Type</em>.</p>
+<p>A <code>MultiDiagonalRBFE</code> has different diagonal covariance matrices for all basis functions See also <code>MultiUniformRBFE</code>, which has the same covariance matrix for all basis functions</p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/BasisFunctionExpansions.jl#L114-L117' class='documenter-source'>source</a><br></p>
+<p><a id='BasisFunctionExpansions.MultiDiagonalRBFE-Tuple{AbstractArray{T,2} where T,Any}' href='#BasisFunctionExpansions.MultiDiagonalRBFE-Tuple{AbstractArray{T,2} where T,Any}'>#</a>
+<strong><code>BasisFunctionExpansions.MultiDiagonalRBFE</code></strong> &mdash; <em>Method</em>.</p>
+<pre><code>MultiDiagonalRBFE(v::AbstractVector, nc; normalize=false, coulomb=false)
+</code></pre>
+
+<p>Supply scheduling signal <code>v</code> and numer of centers <code>nc</code> For automatic selection of covariance matrices and centers using K-means.</p>
+<p>The keyword <code>normalize</code> determines weather or not basis function activations are normalized to sum to one for each datapoint, normalized networks tend to extrapolate better <a href="http://ieeexplore.ieee.org/document/728118/">"The normalized radial basis function neural network" DOI: 10.1109/ICSMC.1998.728118</a></p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/BasisFunctionExpansions.jl#L133-L139' class='documenter-source'>source</a><br></p>
+<p><a id='BasisFunctionExpansions.MultiDiagonalRBFE-Union{Tuple{AbstractArray{T,2} where T,AbstractArray{T,1},Any}, Tuple{T}} where T<:(AbstractArray{T,1} where T)' href='#BasisFunctionExpansions.MultiDiagonalRBFE-Union{Tuple{AbstractArray{T,2} where T,AbstractArray{T,1},Any}, Tuple{T}} where T<:(AbstractArray{T,1} where T)'>#</a>
+<strong><code>BasisFunctionExpansions.MultiDiagonalRBFE</code></strong> &mdash; <em>Method</em>.</p>
+<pre><code>MultiDiagonalRBFE(μ::Matrix, Σ::Vector{Vector{Float64}}, activation)
+</code></pre>
+
+<p>Supply all parameters. Σ is the diagonals of the covariance matrices</p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/BasisFunctionExpansions.jl#L124-L128' class='documenter-source'>source</a><br></p>
+<p><a id='BasisFunctionExpansions.MultiRBFE' href='#BasisFunctionExpansions.MultiRBFE'>#</a>
+<strong><code>BasisFunctionExpansions.MultiRBFE</code></strong> &mdash; <em>Type</em>.</p>
+<p>A <code>MultiRBFE</code> has different diagonal covariance matrices for all basis functions See also <code>MultiUniformRBFE</code>, which has the same covariance matrix for all basis functions</p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/BasisFunctionExpansions.jl#L150-L153' class='documenter-source'>source</a><br></p>
+<p><a id='BasisFunctionExpansions.MultiRBFE-Tuple{AbstractArray{T,2} where T,Any}' href='#BasisFunctionExpansions.MultiRBFE-Tuple{AbstractArray{T,2} where T,Any}'>#</a>
+<strong><code>BasisFunctionExpansions.MultiRBFE</code></strong> &mdash; <em>Method</em>.</p>
+<pre><code>MultiRBFE(v::AbstractVector, nc; normalize=false, coulomb=false)
+</code></pre>
+
+<p>Supply scheduling signal <code>v</code> and numer of centers <code>nc</code> For automatic selection of covariance matrices and centers using K-means.</p>
+<p>The keyword <code>normalize</code> determines weather or not basis function activations are normalized to sum to one for each datapoint, normalized networks tend to extrapolate better <a href="http://ieeexplore.ieee.org/document/728118/">"The normalized radial basis function neural network" DOI: 10.1109/ICSMC.1998.728118</a></p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/BasisFunctionExpansions.jl#L169-L175' class='documenter-source'>source</a><br></p>
+<p><a id='BasisFunctionExpansions.MultiRBFE-Union{Tuple{AbstractArray{T,2} where T,AbstractArray{T,1},Any}, Tuple{T}} where T<:(AbstractArray{T,1} where T)' href='#BasisFunctionExpansions.MultiRBFE-Union{Tuple{AbstractArray{T,2} where T,AbstractArray{T,1},Any}, Tuple{T}} where T<:(AbstractArray{T,1} where T)'>#</a>
+<strong><code>BasisFunctionExpansions.MultiRBFE</code></strong> &mdash; <em>Method</em>.</p>
+<pre><code>MultiRBFE(μ::Matrix, Σ::Vector{Vector{Float64}}, activation)
+</code></pre>
+
+<p>Supply all parameters. Σ is the diagonals of the covariance matrices</p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/BasisFunctionExpansions.jl#L160-L164' class='documenter-source'>source</a><br></p>
+<p><a id='BasisFunctionExpansions.MultiUniformRBFE' href='#BasisFunctionExpansions.MultiUniformRBFE'>#</a>
+<strong><code>BasisFunctionExpansions.MultiUniformRBFE</code></strong> &mdash; <em>Type</em>.</p>
+<p>A <code>MultiUniformRBFE</code> has the same diagonal covariance matrix for all basis functions See also <code>MultiDiagonalRBFE</code>, which has different covariance matrices for all basis functions</p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/BasisFunctionExpansions.jl#L78-L81' class='documenter-source'>source</a><br></p>
+<p><a id='BasisFunctionExpansions.MultiUniformRBFE-Tuple{AbstractArray{T,2} where T,AbstractArray{Int64,1}}' href='#BasisFunctionExpansions.MultiUniformRBFE-Tuple{AbstractArray{T,2} where T,AbstractArray{Int64,1}}'>#</a>
+<strong><code>BasisFunctionExpansions.MultiUniformRBFE</code></strong> &mdash; <em>Method</em>.</p>
+<pre><code>MultiUniformRBFE(v::AbstractVector, Nv::Vector{Int}; normalize=false, coulomb=false)
+</code></pre>
+
+<p>Supply scheduling signal and number of basis functions For automatic selection of centers and widths</p>
+<p>The keyword <code>normalize</code> determines weather or not basis function activations are normalized to sum to one for each datapoint, normalized networks tend to extrapolate better <a href="http://ieeexplore.ieee.org/document/728118/">"The normalized radial basis function neural network" DOI: 10.1109/ICSMC.1998.728118</a></p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/BasisFunctionExpansions.jl#L97-L103' class='documenter-source'>source</a><br></p>
+<p><a id='BasisFunctionExpansions.MultiUniformRBFE-Tuple{AbstractArray{T,2} where T,AbstractArray{T,1} where T,Any}' href='#BasisFunctionExpansions.MultiUniformRBFE-Tuple{AbstractArray{T,2} where T,AbstractArray{T,1} where T,Any}'>#</a>
+<strong><code>BasisFunctionExpansions.MultiUniformRBFE</code></strong> &mdash; <em>Method</em>.</p>
+<pre><code>MultiUniformRBFE(μ::Matrix, Σ::Vector, activation)
+</code></pre>
+
+<p>Supply all parameters. Σ is the diagonal of the covariance matrix</p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/BasisFunctionExpansions.jl#L88-L92' class='documenter-source'>source</a><br></p>
 <p><a id='BasisFunctionExpansions.BasisFunctionApproximation' href='#BasisFunctionExpansions.BasisFunctionApproximation'>#</a>
 <strong><code>BasisFunctionExpansions.BasisFunctionApproximation</code></strong> &mdash; <em>Type</em>.</p>
 <pre><code>BasisFunctionApproximation(y::Vector, v, bfe::BasisFunctionExpansion, λ = 0)
 </code></pre>
 
 <p>Perform parameter identification to identify the Function <code>y = ϕ(v)</code>, where <code>ϕ</code> is a Basis Function Expansion of type <code>bfe</code>. <code>λ</code> is an optional regularization parameter (L² regularization).</p>
-<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/0ca592d5f388d7f3eabfa6aa049077a561092666/src/BasisFunctionExpansions.jl#L23-L28' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/BasisFunctionExpansions.jl#L23-L28' class='documenter-source'>source</a><br></p>
 <p><a id='BasisFunctionExpansions.UniformRBFE' href='#BasisFunctionExpansions.UniformRBFE'>#</a>
 <strong><code>BasisFunctionExpansions.UniformRBFE</code></strong> &mdash; <em>Type</em>.</p>
 <p>A Uniform RBFE has the same variance for all basis functions</p>
-<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/0ca592d5f388d7f3eabfa6aa049077a561092666/src/BasisFunctionExpansions.jl#L46-L48' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/BasisFunctionExpansions.jl#L46-L48' class='documenter-source'>source</a><br></p>
 <p><a id='BasisFunctionExpansions.UniformRBFE-Tuple{AbstractArray{T,1} where T,AbstractFloat,Any}' href='#BasisFunctionExpansions.UniformRBFE-Tuple{AbstractArray{T,1} where T,AbstractFloat,Any}'>#</a>
 <strong><code>BasisFunctionExpansions.UniformRBFE</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>UniformRBFE(μ::Vector, σ::Float, activation)
 </code></pre>
 
 <p>Supply all parameters. OBS! <code>σ</code> can not be an integer, must be some kind of AbstractFloat</p>
-<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/0ca592d5f388d7f3eabfa6aa049077a561092666/src/BasisFunctionExpansions.jl#L55-L59' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/BasisFunctionExpansions.jl#L55-L59' class='documenter-source'>source</a><br></p>
 <p><a id='BasisFunctionExpansions.UniformRBFE-Tuple{AbstractArray{T,1} where T,Int64}' href='#BasisFunctionExpansions.UniformRBFE-Tuple{AbstractArray{T,1} where T,Int64}'>#</a>
 <strong><code>BasisFunctionExpansions.UniformRBFE</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>UniformRBFE(v::Vector, Nv::Int; normalize=false, coulomb=false)
@@ -174,33 +253,33 @@
 
 <p>Supply scheduling signal and number of basis functions For automatic selection of centers and widths</p>
 <p>The keyword <code>normalize</code> determines weather or not basis function activations are normalized to sum to one for each datapoint, normalized networks tend to extrapolate better <a href="http://ieeexplore.ieee.org/document/728118/">"The normalized radial basis function neural network" DOI: 10.1109/ICSMC.1998.728118</a></p>
-<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/0ca592d5f388d7f3eabfa6aa049077a561092666/src/BasisFunctionExpansions.jl#L64-L70' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/BasisFunctionExpansions.jl#L64-L70' class='documenter-source'>source</a><br></p>
 <p><a id='BasisFunctionExpansions.get_centers' href='#BasisFunctionExpansions.get_centers'>#</a>
 <strong><code>BasisFunctionExpansions.get_centers</code></strong> &mdash; <em>Function</em>.</p>
 <pre><code>vc,γ = get_centers(bounds, Nv, coulomb=false, coulombdims=0)
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/0ca592d5f388d7f3eabfa6aa049077a561092666/src/BasisFunctionExpansions.jl#L306-L308' class='documenter-source'>source</a><br></p>
-<p><a id='BasisFunctionExpansions.get_centers_automatic' href='#BasisFunctionExpansions.get_centers_automatic'>#</a>
-<strong><code>BasisFunctionExpansions.get_centers_automatic</code></strong> &mdash; <em>Function</em>.</p>
-<pre><code>vc,γ = get_centers_automatic(v::AbstractVector,Nv::Int,coulomb = false)
-</code></pre>
-
-<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/0ca592d5f388d7f3eabfa6aa049077a561092666/src/BasisFunctionExpansions.jl#L276-L278' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/BasisFunctionExpansions.jl#L306-L308' class='documenter-source'>source</a><br></p>
 <p><a id='BasisFunctionExpansions.get_centers_automatic' href='#BasisFunctionExpansions.get_centers_automatic'>#</a>
 <strong><code>BasisFunctionExpansions.get_centers_automatic</code></strong> &mdash; <em>Function</em>.</p>
 <pre><code>vc,γ = get_centers_automatic(v::AbstractMatrix, Nv::AbstractVector{Int}, coulomb=false, coulombdims=0)
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/0ca592d5f388d7f3eabfa6aa049077a561092666/src/BasisFunctionExpansions.jl#L293-L295' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/BasisFunctionExpansions.jl#L293-L295' class='documenter-source'>source</a><br></p>
+<p><a id='BasisFunctionExpansions.get_centers_automatic' href='#BasisFunctionExpansions.get_centers_automatic'>#</a>
+<strong><code>BasisFunctionExpansions.get_centers_automatic</code></strong> &mdash; <em>Function</em>.</p>
+<pre><code>vc,γ = get_centers_automatic(v::AbstractVector,Nv::Int,coulomb = false)
+</code></pre>
+
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/BasisFunctionExpansions.jl#L276-L278' class='documenter-source'>source</a><br></p>
 <p><a id='Usage-1'></a></p>
-<h2 id="usage">Usage</h2>
+<h1 id="usage">Usage</h1>
 <p>We demonstrate typical usage with some examples.</p>
 <p>The idea is to create an object representing an expansion. This object contains information regarding the domain of the expansion, which type of basis functions used and how many. These objects are, once created, callable with a scheduling vector/matrix. A call like this returns a vector/matrix of basis function activations.</p>
 <p>To reconstruct a signal, a linear combination of basis functions must be estimated. To facilitate this, a second type of object is available: <code>BasisFunctionApproximation</code>. Once created, <code>BasisFunctionApproximation</code>s are callable with a scheduling signal and return an estimate of the output. The parameter estimation is performed behind the scenes using standard linear regression (least-squares). An optional regularization parameter can be supplied if needed, see <code>?BasisFunctionApproximation</code> for help.</p>
 <p>Plotting functionality requires <code>Plots.jl</code></p>
 <p><a id='Single-dimension-1'></a></p>
-<h3 id="single-dimension">Single dimension</h3>
+<h2 id="single-dimension">Single dimension</h2>
 <p>We start by simulating a signal <script type="math/tex">y</script> and a scheduling signal <script type="math/tex">v</script>. The task is to estimate a function <script type="math/tex">y = \phi(v)</script>, where <script type="math/tex">\phi</script> is a basis function expansion.</p>
 <pre><code class="julia">N = 1000
 v = linspace(0,10,N) # Scheduling signal
@@ -226,7 +305,7 @@ plot!(v,hcat(ŷ_linreg...), lab=[&quot;Linear regression order $i&quot; for i=1
 <p><img alt="window" src="./figs/onedim.png" /></p>
 <p>As we can see from the figure, the linear combination of basis functions forming the reconstruction has learnt the overall structure of the signal <script type="math/tex">y</script>. To capture more detail, one can try to increase the number of basis functions. The final choice of this number is a tradeoff between reconstruction bias and variance, where a high number of basis functions can model the signal in great detail, but may increase the variance if data is sparse.</p>
 <p><a id='Plotting-1'></a></p>
-<h4 id="plotting">Plotting</h4>
+<h3 id="plotting">Plotting</h3>
 <p><code>BasisFunctionExpansion</code> objects can be plotted if <code>Plots.jl</code> is loaded. This works for 1 and 2 dimensional expansions only.</p>
 <pre><code class="julia">N   = 200
 v   = linspace(0,10,N)
@@ -241,7 +320,7 @@ plot!(v,bfa(v),lab=&quot;Reconstruction&quot;,c=:blue,linewidth=2)
 
 <p><img alt="window" src="./figs/singlebase.png" /></p>
 <p><a id='Multiple-dimensions-1'></a></p>
-<h3 id="multiple-dimensions">Multiple dimensions</h3>
+<h2 id="multiple-dimensions">Multiple dimensions</h2>
 <p>We now demonstrate the same thing but with <script type="math/tex">v \in \mathbf{R}^2</script>. To create a nice plot, we let <script type="math/tex">v</script> form a spiral with increasing radius.</p>
 <pre><code class="julia">using BasisFunctionExpansions
 N = 1000
@@ -264,7 +343,7 @@ scatter3d!(v[:,1],v[:,2],ŷ, lab=&quot;Reconstruction&quot;)
 <p>To visualize also the basis functions, we can simply call <code>plot!(rbf)</code> (the exclamation mark adds to the current plot instead of creating a new one). Below is an example when a 5x5 BFE is visualized using <code>plotly</code> as backend.</p>
 <p><img alt="window" src="./figs/multibase.png" /></p>
 <p><a id='Nonuniform-covariance-1'></a></p>
-<h4 id="nonuniform-covariance">Nonuniform covariance</h4>
+<h3 id="nonuniform-covariance">Nonuniform covariance</h3>
 <p>We can let all centers have different (diagonal) covariance matrices using the type <code>MultiDiagonalRBFE</code>. In this case, good center locations and covariances are estimated using K-means clustering. With this strategy, we can usually get away with much fewer basis functions compared to a uniform grid. A drawback is that we must know in advance which area of the scheduling signal space is of interest.</p>
 <pre><code class="julia">Nc   = 8
 rbf  = MultiDiagonalRBFE(v,Nc, normalize=true)
@@ -275,7 +354,7 @@ scatter3d!(v[:,1],v[:,2],yhat, lab=&quot;Reconstruction&quot;)
 </code></pre>
 
 <p><a id='Full-covariance-1'></a></p>
-<h4 id="full-covariance">Full covariance</h4>
+<h3 id="full-covariance">Full covariance</h3>
 <p>For the type <code>MultiRBFE</code> The covariance matrix and center locations are esimated using K-means.</p>
 <pre><code class="julia">Nc   = 8                            # Number of centers/BFs
 rbf  = MultiRBFE(v,Nc, normalize=true)
@@ -307,7 +386,7 @@ plot(nvec, lcurve, yscale=:log10, ylabel=&quot;RMS Error&quot;, xlabel=&quot;Num
 <p><a id='BasisFunctionExpansions.LPVSS' href='#BasisFunctionExpansions.LPVSS'>#</a>
 <strong><code>BasisFunctionExpansions.LPVSS</code></strong> &mdash; <em>Type</em>.</p>
 <p>Convenience tyoe for estimation of LPV state-space models</p>
-<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/0ca592d5f388d7f3eabfa6aa049077a561092666/src/dynamics.jl#L77' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/dynamics.jl#L77' class='documenter-source'>source</a><br></p>
 <p><a id='BasisFunctionExpansions.LPVSS-Tuple{Any,Any,Any}' href='#BasisFunctionExpansions.LPVSS-Tuple{Any,Any,Any}'>#</a>
 <strong><code>BasisFunctionExpansions.LPVSS</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>LPVSS(x, u, nc; normalize=true, λ = 1e-3)
@@ -332,7 +411,7 @@ eRMS &lt;= 0.37
 true
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/0ca592d5f388d7f3eabfa6aa049077a561092666/src/dynamics.jl#L85-L110' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/dynamics.jl#L85-L110' class='documenter-source'>source</a><br></p>
 <p><a id='BasisFunctionExpansions.LPVSS-Tuple{Any,Any,Union{AbstractArray{T,1}, AbstractArray{T,2}} where T,Any}' href='#BasisFunctionExpansions.LPVSS-Tuple{Any,Any,Union{AbstractArray{T,1}, AbstractArray{T,2}} where T,Any}'>#</a>
 <strong><code>BasisFunctionExpansions.LPVSS</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>LPVSS(x, u, v, nc; normalize=true, λ = 1e-3)
@@ -359,7 +438,7 @@ eRMS &lt;= 0.26
 true
 </code></pre>
 
-<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/0ca592d5f388d7f3eabfa6aa049077a561092666/src/dynamics.jl#L118-L145' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/dynamics.jl#L118-L145' class='documenter-source'>source</a><br></p>
 <p><a id='BasisFunctionExpansions.getARXregressor-Tuple{AbstractArray{T,1} where T,Union{AbstractArray{T,1}, AbstractArray{T,2}} where T,Any,Any}' href='#BasisFunctionExpansions.getARXregressor-Tuple{AbstractArray{T,1} where T,Union{AbstractArray{T,1}, AbstractArray{T,2}} where T,Any,Any}'>#</a>
 <strong><code>BasisFunctionExpansions.getARXregressor</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>getARXregressor(y::AbstractVector,u::AbstractVecOrMat, na, nb)
@@ -381,35 +460,35 @@ plot([yr bfa(A)], lab=[&quot;Signal&quot; &quot;Prediction&quot;])
 </code></pre>
 
 <p>See README (<code>?BasisFunctionExpansions</code>) for more details</p>
-<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/0ca592d5f388d7f3eabfa6aa049077a561092666/src/dynamics.jl#L30-L54' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/dynamics.jl#L30-L54' class='documenter-source'>source</a><br></p>
 <p><a id='BasisFunctionExpansions.getARregressor-Tuple{AbstractArray{T,1} where T,Any}' href='#BasisFunctionExpansions.getARregressor-Tuple{AbstractArray{T,1} where T,Any}'>#</a>
 <strong><code>BasisFunctionExpansions.getARregressor</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>y,A = getARregressor(y::AbstractVector,na::Integer)
 </code></pre>
 
 <p>Returns a shortened output signal <code>y</code> and a regressor matrix <code>A</code> such that the least-squares AR model estimate of order <code>na</code> is <code>y\A</code></p>
-<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/0ca592d5f388d7f3eabfa6aa049077a561092666/src/dynamics.jl#L18-L22' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/dynamics.jl#L18-L22' class='documenter-source'>source</a><br></p>
 <p><a id='BasisFunctionExpansions.predict-Tuple{BasisFunctionExpansions.LPVSS,AbstractArray{T,2} where T,Any,Any}' href='#BasisFunctionExpansions.predict-Tuple{BasisFunctionExpansions.LPVSS,AbstractArray{T,2} where T,Any,Any}'>#</a>
 <strong><code>BasisFunctionExpansions.predict</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>predict(model::LPVSS, x, u, v)
 </code></pre>
 
 <p>Return a prediction of the output <code>x'</code> given the state <code>x</code>, input <code>u</code> and scheduling parameter <code>v</code> This function is called when a <code>model::LPVSS</code> object is called like <code>model(x,u,v)</code></p>
-<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/0ca592d5f388d7f3eabfa6aa049077a561092666/src/dynamics.jl#L195-L201' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/dynamics.jl#L195-L201' class='documenter-source'>source</a><br></p>
 <p><a id='BasisFunctionExpansions.predict-Tuple{BasisFunctionExpansions.LPVSS,AbstractArray{T,2} where T,Any}' href='#BasisFunctionExpansions.predict-Tuple{BasisFunctionExpansions.LPVSS,AbstractArray{T,2} where T,Any}'>#</a>
 <strong><code>BasisFunctionExpansions.predict</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>predict(model::LPVSS, x::AbstractMatrix, u)
 </code></pre>
 
 <p>Return a prediction of the output <code>x'</code> given the state <code>x</code> and input <code>u</code> This function is called when a <code>model::LPVSS</code> object is called like <code>model(x,u)</code></p>
-<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/0ca592d5f388d7f3eabfa6aa049077a561092666/src/dynamics.jl#L184-L189' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/dynamics.jl#L184-L189' class='documenter-source'>source</a><br></p>
 <p><a id='BasisFunctionExpansions.toeplitz-Union{Tuple{AbstractArray{T,N} where N,AbstractArray{T,N} where N}, Tuple{T}} where T' href='#BasisFunctionExpansions.toeplitz-Union{Tuple{AbstractArray{T,N} where N,AbstractArray{T,N} where N}, Tuple{T}} where T'>#</a>
 <strong><code>BasisFunctionExpansions.toeplitz</code></strong> &mdash; <em>Method</em>.</p>
 <pre><code>toeplitz{T}(c::AbstractArray{T},r::AbstractArray{T})
 </code></pre>
 
 <p>Returns a Toeplitz matrix where <code>c</code> is the first column and <code>r</code> is the first row.</p>
-<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/0ca592d5f388d7f3eabfa6aa049077a561092666/src/dynamics.jl#L1-L5' class='documenter-source'>source</a><br></p>
+<p><a target='_blank' href='https://github.com/baggepinnen/BasisFunctionExpansions.jl/tree/328b713955366a0139d6c5f72e5adec63af250b2/src/dynamics.jl#L1-L5' class='documenter-source'>source</a><br></p>
 <p><a id='LPV-ARX-modeling-1'></a></p>
 <h2 id="lpv-arx-modeling">LPV ARX modeling</h2>
 <p>We can use basis function expansions for identification of elementary, non-linear dynamics models. Consider the following dynamical system, with a non-linearity on the input <script type="math/tex">A(z)y = B(z)\sqrt{|u|}</script> We can simulate this system using the code</p>
@@ -457,6 +536,25 @@ plot!(x[2:end,:], lab=&quot;True&quot;, c=:blue); gui()
 </code></pre>
 
 <p><img alt="window" src="./figs/lpvss.png" /></p>
+<p><a id='Gradients-1'></a></p>
+<h1 id="gradients">Gradients</h1>
+<p>BasisFunctionExpansions plays nice with <a href="https://github.com/JuliaDiff/ReverseDiff.jl">ReverseDiff.jl</a> and <a href="https://github.com/JuliaDiff/ForwardDiff.jl">ForwardDiff.jl</a></p>
+<pre><code class="jldoctest">julia&gt; using ReverseDiff
+julia&gt; a = randn(1,2)
+julia&gt; ReverseDiff.gradient(bfa,a) # bfa here comes from the Multi-dim example
+1×2 Array{Float64,2}:
+ 1.29364  -0.536586
+
+julia&gt; h = 0.0001 # Finite difference for validation
+0.0001
+
+julia&gt; [(bfa(a+[h 0]) - bfa(a))/h (bfa(a+[0 h]) - bfa(a))/h]
+1×2 Array{Float64,2}:
+ 1.29363  -0.536488
+</code></pre>
+
+<p>Note: for <code>ForwardDiff.jl</code> to work, you have to use <code>ForwardDiff.jacobian</code> instead of  <code>ForwardDiff.gradient</code>.</p>
+<p>See <code>?ReverseDiff.gradient</code> for tips regarding high performance gradient calculation through preallocation of GradientConfig and prerecording of <code>bfa</code>.</p>
 <p><a id='Learn-more-1'></a></p>
 <h1 id="learn-more">Learn more</h1>
 <p>Functionality in this package is used in the packages</p>
@@ -474,12 +572,21 @@ plot!(x[2:end,:], lab=&quot;True&quot;, c=:blue); gui()
 <h1 id="index">Index</h1>
 <ul>
 <li><a href=".#BasisFunctionExpansions.BasisFunctionApproximation"><code>BasisFunctionExpansions.BasisFunctionApproximation</code></a></li>
+<li><a href=".#BasisFunctionExpansions.LPVSS-Tuple{Any,Any,Union{AbstractArray{T,1}, AbstractArray{T,2}} where T,Any}"><code>BasisFunctionExpansions.LPVSS</code></a></li>
 <li><a href=".#BasisFunctionExpansions.LPVSS-Tuple{Any,Any,Any}"><code>BasisFunctionExpansions.LPVSS</code></a></li>
 <li><a href=".#BasisFunctionExpansions.LPVSS"><code>BasisFunctionExpansions.LPVSS</code></a></li>
-<li><a href=".#BasisFunctionExpansions.LPVSS-Tuple{Any,Any,Union{AbstractArray{T,1}, AbstractArray{T,2}} where T,Any}"><code>BasisFunctionExpansions.LPVSS</code></a></li>
-<li><a href=".#BasisFunctionExpansions.UniformRBFE-Tuple{AbstractArray{T,1} where T,Int64}"><code>BasisFunctionExpansions.UniformRBFE</code></a></li>
-<li><a href=".#BasisFunctionExpansions.UniformRBFE-Tuple{AbstractArray{T,1} where T,AbstractFloat,Any}"><code>BasisFunctionExpansions.UniformRBFE</code></a></li>
+<li><a href=".#BasisFunctionExpansions.MultiDiagonalRBFE"><code>BasisFunctionExpansions.MultiDiagonalRBFE</code></a></li>
+<li><a href=".#BasisFunctionExpansions.MultiDiagonalRBFE-Tuple{AbstractArray{T,2} where T,Any}"><code>BasisFunctionExpansions.MultiDiagonalRBFE</code></a></li>
+<li><a href=".#BasisFunctionExpansions.MultiDiagonalRBFE-Union{Tuple{AbstractArray{T,2} where T,AbstractArray{T,1},Any}, Tuple{T}} where T&lt;:(AbstractArray{T,1} where T)"><code>BasisFunctionExpansions.MultiDiagonalRBFE</code></a></li>
+<li><a href=".#BasisFunctionExpansions.MultiRBFE-Union{Tuple{AbstractArray{T,2} where T,AbstractArray{T,1},Any}, Tuple{T}} where T&lt;:(AbstractArray{T,1} where T)"><code>BasisFunctionExpansions.MultiRBFE</code></a></li>
+<li><a href=".#BasisFunctionExpansions.MultiRBFE"><code>BasisFunctionExpansions.MultiRBFE</code></a></li>
+<li><a href=".#BasisFunctionExpansions.MultiRBFE-Tuple{AbstractArray{T,2} where T,Any}"><code>BasisFunctionExpansions.MultiRBFE</code></a></li>
+<li><a href=".#BasisFunctionExpansions.MultiUniformRBFE-Tuple{AbstractArray{T,2} where T,AbstractArray{T,1} where T,Any}"><code>BasisFunctionExpansions.MultiUniformRBFE</code></a></li>
+<li><a href=".#BasisFunctionExpansions.MultiUniformRBFE"><code>BasisFunctionExpansions.MultiUniformRBFE</code></a></li>
+<li><a href=".#BasisFunctionExpansions.MultiUniformRBFE-Tuple{AbstractArray{T,2} where T,AbstractArray{Int64,1}}"><code>BasisFunctionExpansions.MultiUniformRBFE</code></a></li>
 <li><a href=".#BasisFunctionExpansions.UniformRBFE"><code>BasisFunctionExpansions.UniformRBFE</code></a></li>
+<li><a href=".#BasisFunctionExpansions.UniformRBFE-Tuple{AbstractArray{T,1} where T,AbstractFloat,Any}"><code>BasisFunctionExpansions.UniformRBFE</code></a></li>
+<li><a href=".#BasisFunctionExpansions.UniformRBFE-Tuple{AbstractArray{T,1} where T,Int64}"><code>BasisFunctionExpansions.UniformRBFE</code></a></li>
 <li><a href=".#BasisFunctionExpansions.getARXregressor-Tuple{AbstractArray{T,1} where T,Union{AbstractArray{T,1}, AbstractArray{T,2}} where T,Any,Any}"><code>BasisFunctionExpansions.getARXregressor</code></a></li>
 <li><a href=".#BasisFunctionExpansions.getARregressor-Tuple{AbstractArray{T,1} where T,Any}"><code>BasisFunctionExpansions.getARregressor</code></a></li>
 <li><a href=".#BasisFunctionExpansions.get_centers"><code>BasisFunctionExpansions.get_centers</code></a></li>
@@ -488,47 +595,60 @@ plot!(x[2:end,:], lab=&quot;True&quot;, c=:blue); gui()
 <li><a href=".#BasisFunctionExpansions.predict-Tuple{BasisFunctionExpansions.LPVSS,AbstractArray{T,2} where T,Any,Any}"><code>BasisFunctionExpansions.predict</code></a></li>
 <li><a href=".#BasisFunctionExpansions.predict-Tuple{BasisFunctionExpansions.LPVSS,AbstractArray{T,2} where T,Any}"><code>BasisFunctionExpansions.predict</code></a></li>
 <li><a href=".#BasisFunctionExpansions.toeplitz-Union{Tuple{AbstractArray{T,N} where N,AbstractArray{T,N} where N}, Tuple{T}} where T"><code>BasisFunctionExpansions.toeplitz</code></a></li>
-</ul>
-              
+</ul></div>
+        
+    </div>
+
+    <footer class="col-md-12 text-center">
+        <hr>
+        <p>
+        <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p></small>
+    </footer>
+
+    <script src="./js/jquery-1.10.2.min.js"></script>
+    <script src="./js/bootstrap-3.0.3.min.js"></script>
+    <script src="./js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script>
+    var base_url = '.';
+    </script>
+    <script data-main="./mkdocs/js/search.js" src="./mkdocs/js/require.js"></script>
+    <script src="./js/base.js"></script>
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    <script src="./assets/mathjaxhelper.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                    <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        From here you can search these documents. Enter your search terms below.
+                    </p>
+                    <form role="form">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                        </div>
+                    </form>
+                    <div id="mkdocs-search-results"></div>
+                </div>
+                <div class="modal-footer">
+                </div>
             </div>
-          </div>
-          <footer>
-  
-
-  <hr/>
-
-  <div role="contentinfo">
-    <!-- Copyright etc -->
-    
-  </div>
-
-  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
-</footer>
-	  
         </div>
-      </div>
+    </div>
 
-    </section>
-    
-  </div>
+    </body>
 
-  <div class="rst-versions" role="note" style="cursor: pointer">
-    <span class="rst-current-version" data-toggle="rst-current-version">
-      
-          <a href="https://github.com/baggepinnen/BasisFunctionExpansions.jl" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
-      
-      
-      
-    </span>
-</div>
-    <script src="./js/theme.js"></script>
-      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
-      <script src="./assets/mathjaxhelper.js"></script>
-
-</body>
 </html>
 
 <!--
 MkDocs version : 0.16.3
-Build Date UTC : 2017-08-02 11:03:55
+Build Date UTC : 2017-08-02 12:42:56
 -->
