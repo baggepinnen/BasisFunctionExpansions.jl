@@ -1,4 +1,4 @@
-using Base.Test
+# using Base.Test
 function testdata(T_)
     # srand(1)
 
@@ -43,7 +43,7 @@ eRMS = √(mean((xh[1:end-1,:]-x[2:end,:]).^2))
 println("RMS error: ", eRMS)
 @test eRMS <= 0.26
 
-using Plots
-plotlyjs(show=true)
-plot(xh[1:end-1,:], lab="Prediction", c=:red, layout=(2,1))
-plot!(x[2:end,:], lab="True", c=:blue)
+# using Plots
+# plotlyjs(show=true)
+# plot(xh[1:end-1,:], lab="Prediction", c=:red, layout=(2,1))
+# plot!(x[2:end,:], lab="True", c=:blue)
