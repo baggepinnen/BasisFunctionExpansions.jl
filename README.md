@@ -17,7 +17,7 @@ Currently supported basis functions are
 
 
 # Usage
-We demonstrate typical usage with some examples.
+We demonstrate typical usage with some examples. Further usage examples in the context of reinforcement learning are provided at [baggepinnen.github.io](https://baggepinnen.github.io/)
 
 The idea is to create an object representing an expansion. This object contains information regarding the domain of the expansion, which type of basis functions used and how many. These objects are, once created, callable with a scheduling vector/matrix. A call like this returns a vector/matrix of basis function activations.
 
