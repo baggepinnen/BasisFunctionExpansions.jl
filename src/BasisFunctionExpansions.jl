@@ -2,7 +2,7 @@ module BasisFunctionExpansions
 using Clustering
 export BasisFunctionExpansion, UniformRBFE, MultiUniformRBFE, MultiDiagonalRBFE, MultiRBFE, BasisFunctionApproximation
 export get_centers, get_centers_multi, get_centers_automatic, quadform, γ2σ, σ2γ
-export toeplitz, getARregressor, getARXregressor, LPVSS, predict
+export toeplitz, getARregressor, getARXregressor, LPVSS, predict, output_variance
 
 ## Types
 abstract type BasisFunctionExpansion{N} end
@@ -421,7 +421,7 @@ Generate `T` time steps of state-space data where the A-matrix changes from
 `r` is the seed to the random number generator.
 """
 function testdata(T_,r=1)
-    srand(1)
+    srand(r)
     n,m      = 2,1
     At_      = [0.95 0.1; 0 0.95]
     Bt_      = reshape([0.2; 1],2,1)
@@ -431,7 +431,7 @@ function testdata(T_,r=1)
         if t == T_÷2
             At_ = [0.5 0.05; 0 0.5]
         end
-        x[:,t+1] = At_*x[:,t] + Bt_*u[:,t] + 0.2randn(n)
+        x[:,t+1] = At_*x[:,t] + Bt_*u[:,t] #+ 0.2randn(n)
     end
     xm = x + 0.2randn(size(x));
     x',xm',u',n,m

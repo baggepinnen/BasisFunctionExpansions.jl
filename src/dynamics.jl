@@ -18,7 +18,8 @@ end
 """
     y,A = getARregressor(y::AbstractVector,na::Integer)
 
-Returns a shortened output signal `y` and a regressor matrix `A` such that the least-squares AR model estimate of order `na` is `y\\A`
+Returns a shortened output signal `y` and a regressor matrix `A` such that the least-squares
+AR model estimate of order `na` is `y\\A`
 """
 function getARregressor(y::AbstractVector,na)
     A = toeplitz(y[na+1:end],y[na+1:-1:1])
@@ -30,7 +31,8 @@ end
 """
     getARXregressor(y::AbstractVector,u::AbstractVecOrMat, na, nb)
 
-Returns a shortened output signal `y` and a regressor matrix `A` such that the least-squares ARX model estimate of order `na,nb` is `y\\A`
+Returns a shortened output signal `y` and a regressor matrix `A` such that the least-squares
+ARX model estimate of order `na,nb` is `y\\A`
 
 Return a regressor matrix used to fit an ARX model on, e.g., the form
 `A(z)y = B(z)f(u)`
@@ -78,6 +80,8 @@ end
 struct LPVSS
     bfe::BasisFunctionExpansion
     params
+    cov
+    σ
 end
 
 Base.show(io::IO, model::LPVSS) = print(io,"LPVSS model with $(typeof(model.bfe)) and $(length(model.params)*length(model.params[1])) parameters")
@@ -86,8 +90,9 @@ Base.show(io::IO, model::LPVSS) = print(io,"LPVSS model with $(typeof(model.bfe)
     LPVSS(x, u, nc; normalize=true, λ = 1e-3)
 
 Linear Parameter-Varying State-space model. Estimate a state-space model with
-varying coefficient matrices `x(t+1) = A(v)x(t) + B(v)u(t)`. Internally a `MultiRBFE` spanning the space of `X × U` is used. `x` and `u` should have time in first dimension. Centers are found
-automatically using k-means, see `MultiRBFE`.
+varying coefficient matrices `x(t+1) = A(v)x(t) + B(v)u(t)`. Internally a `MultiRBFE` spanning
+the space of `X × U` is used. `x` and `u` should have time in first dimension. Centers are
+found automatically using k-means, see `MultiRBFE`.
 
 # Examples
 ```jldoctest
@@ -109,18 +114,20 @@ true
 ```
 """
 function LPVSS(x, u, nc; normalize=true, λ = 1e-3)
-    y,A  = matricesn(x,u)
-    bfe  = MultiRBFE(A, nc; normalize=normalize) # A is sched/regressor matrix
-    params = fit_ss(y,A,A,bfe,λ)
-    LPVSS(bfe, params)
+    y,A         = matricesn(x,u)
+    bfe         = MultiRBFE(A, nc; normalize=normalize) # A is sched/regressor matrix
+    params, cov, σ = fit_ss(x,u,A,bfe,λ)
+    LPVSS(bfe, params, cov, σ)
 end
 
 """
     LPVSS(x, u, v, nc; normalize=true, λ = 1e-3)
 
 Linear Parameter-Varying State-space model. Estimate a state-space model with
-varying coefficient matrices `x(t+1) = A(v)x(t) + B(v)u(t)`. Internally a `MultiRBFE` or `UniformRBFE` spanning the space of `v` is used, depending on the dimensionality of `v`. `x`, `u` and `v` should have time in first dimension. Centers are found
-automatically using k-means, see `MultiRBFE`.
+varying coefficient matrices `x(t+1) = A(v)x(t) + B(v)u(t)`. Internally a `MultiRBFE` or
+`UniformRBFE` spanning the space of `v` is used, depending on the dimensionality of
+`v`. `x`, `u` and `v` should have time in first dimension. Centers are found automatically
+using k-means, see `MultiRBFE`.
 
 # Examples
 ```jldoctest
@@ -144,19 +151,21 @@ true
 ```
 """
 function LPVSS(x, u, v::AbstractVecOrMat, nc; normalize=true, λ = 1e-3)
-    y,A  = matricesn(x,u) # A is sched matrix
     if isa(v,AbstractMatrix)
         bfe  = MultiRBFE(v, nc; normalize=normalize)
     else
         bfe  = UniformRBFE(v, nc; normalize=normalize)
     end
-    params = fit_ss(y,A,v,bfe,λ)
-    LPVSS(bfe, params)
+    params, cov, σ = fit_ss(x,u,v,bfe,λ)
+    LPVSS(bfe, params, cov, σ)
 end
 
 function mega_regressor(bfe,v,A)
     nc = length(bfe.μ) ÷ supertype(typeof(bfe)).parameters[1]
     ϕ = bfe(v)
+    if isa(ϕ, Vector)
+        ϕ = ϕ'
+    end
     ϕ = repmat(ϕ,1,size(A,2)) # Extend activations from nc to nc×(n+m)
     ϕ = ϕ.* repmat(A,1,nc)  # Extend regressor from n+m to nc×(n+m)
 end
@@ -164,21 +173,28 @@ end
 shorten_v(v::AbstractVector) = v[1:end-1]
 shorten_v(v::AbstractMatrix) = v[1:end-1,:]
 
-function fit_ss(y,A,v,bfe,λ)
+function fit_ss(x,u,v,bfe,λ)
+    y,A  = matricesn(x,u) # A is sched matrix [x[1:end-1,:] u[1:end-1,:]]
     if size(v,1) > size(A,1)
         v = shorten_v(v)
     end
     ϕ = mega_regressor(bfe,v,A)
     p = size(ϕ,2)
+    B = factorize(λ == 0 ? ϕ : [ϕ; λ*eye(p)])
     params = mapslices(y,1) do y
         if λ == 0
-            x = ϕ\y
+            x = B\y
         else
-            x = [ϕ; λ*eye(p)]\[y;zeros(p)]
+            x = B\[y;zeros(p)]
         end
-    end
-    # We now have n vectors of nc(n+m) parameters = nc(n+m)×n
-    return params
+    end # We now have n vectors of nc(n+m) parameters = nc(n+m)×n
+    σ = [std(y[:,i] - ϕ*params[:,i]) for i =1:size(params,2)]
+    ATA = cholfact(B[:R]'B[:R])
+    cov = λ == 0 ? inv(ATA) : ATA\(ϕ'ϕ)/full(ATA) # / not defined for factorizations https://github.com/JuliaLang/julia/issues/12436
+
+    # icov = cholfact(Hermitian(q))
+    # icov = cholfact(Symmetric(q[:R]'q[:R]))
+    return params, cov, σ
 end
 
 """
@@ -193,13 +209,14 @@ function predict(model::LPVSS, x::AbstractMatrix, u)
 end
 
 """
-    predict(model::LPVSS, x, u, v)
+    predict(model::LPVSS, x::AbstractMatrix, u, v=[x u])
 
-Return a prediction of the output `x'` given the state `x`, input `u` and
+If no `v` provided, return a prediction of the output `x'` given the state `x` and input `u`
+
+Provided `v`, return a prediction of the output `x'` given the state `x`, input `u` and
 scheduling parameter `v`
-This function is called when a `model::LPVSS` object is called like `model(x,u,v)`
 """
-function predict(model::LPVSS, x::AbstractMatrix, u, v)
+function predict(model::LPVSS, x::AbstractMatrix, u, v=[x u])
     A = [x u]
     ϕ = mega_regressor(model.bfe,v,A)
     y = similar(x)
@@ -213,7 +230,7 @@ function predict(model::LPVSS, x::AbstractVector, u, v)
     A = [x' u']
     ϕ = mega_regressor(model.bfe,v,A)
     y = map(1:length(x)) do i
-        vecdot(ϕ,model.params[i])
+        vecdot(ϕ,model.params[:,i])
     end
 end
 
@@ -222,3 +239,26 @@ end
 (model::LPVSS)(x,u,v)               = predict(model, x, u, v)
 (model::LPVSS)(x::AbstractMatrix,u) = predict(model, x, u, [x u])
 (model::LPVSS)(x::AbstractVector,u) = predict(model, x, u, [x' u'])
+
+
+function AB_covariance(model::LPVSS)
+    ATA = model.cov
+    σ²  = model.σ^2
+    # ATA has size (n+m)×(n+m)
+    # Full covariance matrix should have size n(n+m)×n(n+m), hence ATA should be composed in
+    # a block form and multiplied with the corresponding σ²
+
+end
+
+"""
+    output_variance(model::LPVSS, x::AbstractVector, u::AbstractVector, v=[x u])
+
+Return a vector of prediction variances. Note, no covariance between dimensions in output is
+provided
+"""
+function output_variance(model::LPVSS, x::AbstractVector, u::AbstractVector, v=[x u])
+    A = [x' u']
+    ϕ = mega_regressor(model.bfe,v,A)[:]
+    mean_var = [σ^2*ϕ'model.cov*ϕ for σ in model.σ]
+    pred_var = [model.σ[i] + sqrt(mean_var[i]) for i = 1:length(model.σ)]
+end

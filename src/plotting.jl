@@ -1,4 +1,5 @@
 using RecipesBase
+import ColorTypes.HSV
 
 @recipe function f(b::UniformRBFE)
     Nv = size(b.μ,1)
