@@ -166,6 +166,18 @@ Bagge Carlson, Fredrik; Robertsson, Anders and Johansson, Rolf
 Bagge Carlson, Fredrik; Robertsson, Anders and Johansson, Rolf
 (2015) IEEE/RSJ International Conference on Intelligent Robots and Systems](http://lup.lub.lu.se/record/7613758)
 
+## Citing
+Users of this package for academic purposes are encouraged to cite the following thesis, for which the software was developed.
+```bibtex
+@thesis{bagge2017,
+  author       = {Bagge Carlson, Fredrik},
+  month        = {03},
+  note         = {Licentiate Thesis},
+  publisher    = {Department of Automatic Control, Lund University},
+  title        = {Modeling and Estimation Topics in Robotics},
+  year         = {2017},
+}
+```
 
 # Gradients
 BasisFunctionExpansions plays nice with [ReverseDiff.jl](https://github.com/JuliaDiff/ReverseDiff.jl) and [ForwardDiff.jl](https://github.com/JuliaDiff/ForwardDiff.jl)
