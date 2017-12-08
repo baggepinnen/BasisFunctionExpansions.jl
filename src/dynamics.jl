@@ -180,7 +180,7 @@ function fit_ss(x,u,v,bfe,λ)
     end
     ϕ = mega_regressor(bfe,v,A)
     p = size(ϕ,2)
-    B = factorize(λ == 0 ? ϕ : [ϕ; λ*eye(p)])
+    B = factorize(λ == 0 ? ϕ : [ϕ; λ*I])
     params = mapslices(y,1) do y
         if λ == 0
             x = B\y
@@ -189,7 +189,7 @@ function fit_ss(x,u,v,bfe,λ)
         end
     end # We now have n vectors of nc(n+m) parameters = nc(n+m)×n
     σ = [std(y[:,i] - ϕ*params[:,i]) for i =1:size(params,2)]
-    ATA = cholfact(B[:R]'B[:R])
+    ATA = cholfact(Hermitian(B[:R]'B[:R]))
     cov = λ == 0 ? inv(ATA) : ATA\(ϕ'ϕ)/full(ATA) # / not defined for factorizations https://github.com/JuliaLang/julia/issues/12436
 
     # icov = cholfact(Hermitian(q))

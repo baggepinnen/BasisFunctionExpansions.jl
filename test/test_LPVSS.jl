@@ -41,7 +41,7 @@ xh = model(x,u,v)
 
 eRMS = √(mean((xh[1:end-1,:]-x[2:end,:]).^2))
 println("RMS error: ", eRMS)
-@test eRMS <= 0.26
+@test eRMS <= 0.28
 
 # using Plots
 # plotlyjs(show=true)
