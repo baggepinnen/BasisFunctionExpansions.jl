@@ -187,7 +187,7 @@ end
 squared_exponential(v::Real,vc,gamma) = exp.(-gamma*(v.-vc).^2)
 squared_exponential(v::AbstractVector,vc,gamma::Number) = exp.(-gamma*(v.-vc').^2)
 squared_exponential(v::AbstractVector,vc,gamma::AbstractVector) = exp.(-((vc'.-v').^2)*gamma)
-function squared_exponential{T}(v::AbstractMatrix{T},vc,gamma::AbstractVector)
+function squared_exponential(v::AbstractMatrix{T},vc,gamma::AbstractVector) where T
     a = Matrix{T}(size(v,1),size(vc,2))
     for i = 1:size(v,1)
         a[i,:] = exp.(-sum(gamma.*(v[i,:].-vc).^2,1))
@@ -322,7 +322,7 @@ function get_centers(bounds, Nv, coulomb=false, coulombdims=0)
         centers[i,:] = vec(repmat(C[i]',v,h))'
         h *= Nv[i]
     end
-    centers, (1./interval).^2
+    centers, (1 ./interval).^2
 end
 
 function get_centers_Kmeans(v, nc::Int; verbose=false)
@@ -363,15 +363,15 @@ function quadform(x::AbstractVector,A::AbstractVector)
     s
 end
 
-γ2σ(γ) = √(1./(2γ))
-σ2γ(σ) = 1./(2σ.^2)
+γ2σ(γ) = √(1 ./(2γ))
+σ2γ(σ) = 1 ./(2σ.^2)
 
 function γ2σ(γ::Vector{T}) where T <: AbstractVector
-    [1./(2γ) for γi in γ]
+    [1 ./(2γ) for γi in γ]
 end
 
 function σ2γ(σ::Vector{T}) where T <: AbstractVector
-    [1./(2σi) for σi in σ]
+    [1 ./(2σi) for σi in σ]
 end
 
 function γ2σ(γ::Vector{T}) where T <: AbstractMatrix
