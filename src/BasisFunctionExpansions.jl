@@ -32,7 +32,7 @@ function BasisFunctionApproximation(y::AbstractVector,v,bfe::BasisFunctionExpans
     if λ == 0
         x = A\y
     else
-        x = [A; λ*eye(p)]\[y;zeros(p)]
+        x = [A; λ*I]\[y;fill(0,p)]
     end
     BasisFunctionApproximation(bfe,x)
 end
@@ -242,7 +242,7 @@ function squared_exponential(v::AbstractMatrix,vc, sigma, velocity::Int=0)
     error("This function has not yet been revised")
     @assert size(v,2) == length(sigma)
     N_basis = size(vc,2)
-    y       = zeros(N_basis)
+    y       = fill(0,N_basis)
     iSIGMA  = sigma.^-2
 
     if velocity > 0
@@ -328,11 +328,11 @@ end
 function get_centers_Kmeans(v, nc::Int; verbose=false)
     iters = 21
     n_state = size(v,2)
-    errorvec = zeros(iters)
+    errorvec = fill(0,iters)
     params = Array{Float64}(nc*2*n_state,iters)
     methods = [:rand;:kmpp]
-    Σ = [zeros(n_state,n_state) for i = 1:nc, j = 1:iters]
-    μ = [zeros(n_state) for i = 1:nc, j = 1:iters]
+    Σ = [fill(0,n_state,n_state) for i = 1:nc, j = 1:iters]
+    μ = [fill(0,n_state) for i = 1:nc, j = 1:iters]
 
     for iter = 1:iters
         clusterresult = Clustering.kmeans(v', nc; maxiter=200, display=:none, init=iter<iters ? methods[iter%2+1] : :kmcen)
@@ -426,7 +426,7 @@ function testdata(T_,r=1)
     At_      = [0.95 0.1; 0 0.95]
     Bt_      = reshape([0.2; 1],2,1)
     u        = randn(1,T_)
-    x        = zeros(n,T_)
+    x        = fill(0,n,T_)
     for t = 1:T_-1
         if t == T_÷2
             At_ = [0.5 0.05; 0 0.5]
