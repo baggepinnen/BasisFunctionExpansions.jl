@@ -3,7 +3,7 @@
 
 Returns a Toeplitz matrix where `c` is the first column and `r` is the first row.
 """
-function toeplitz{T}(c::AbstractArray{T},r::AbstractArray{T})
+function toeplitz(c::AbstractArray{T},r::AbstractArray{T}) where T
     nc = length(c)
     nr = length(r)
     A = zeros(T, nc, nr)

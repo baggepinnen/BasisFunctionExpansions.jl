@@ -29,7 +29,7 @@ Plotting functionality requires `Plots.jl`
 We start by simulating a signal `y` and a scheduling signal `v`. The task is to estimate a function `y = ϕ(v)`, where `ϕ` is a basis function expansion.
 ```julia
 N = 1000
-v = linspace(0,10,N) # Scheduling signal
+v = range(0, stop=10, length=N) # Scheduling signal
 y = randn(N) # Signal to be approximated
 y = filt(ones(500)/500,[1],y)
 ```
@@ -61,7 +61,7 @@ We now demonstrate the same thing but with `v ∈ ℜ²`. To create a nice plot,
 ```julia
 using BasisFunctionExpansions
 N = 1000
-x = linspace(0,4pi,N)
+x = range(0, stop=4pi, length=N)
 v = [cos(x) sin(x)].*x # Scheduling signal
 y = randn(N) # Signal to be approximated
 y = filt(ones(500)/500,[1],y)
@@ -205,7 +205,7 @@ See `?ReverseDiff.gradient` for tips regarding high performance gradient calcula
 
 ```julia
 N   = 200
-v   = linspace(0,10,N)
+v   = range(0, stop=10, length=N)
 y   = 0.1*(v-2).*(v-7) + 0.2randn(N)
 rbf = UniformRBFE(v, 5, normalize = true)
 bfa = BasisFunctionApproximation(y,v,rbf)
@@ -220,7 +220,7 @@ plot!(v,bfa(v),lab="Reconstruction",c=:blue,linewidth=2)
 A simple way of choosing the number of basis functions is to plot an L-curve (parameter vs. error). A suitable number is where the kink in the curve occurs, for this example at around 6 basis functions.
 ```julia
 N    = 200
-v    = linspace(0,10,N)
+v    = range(0, stop=10, length=N)
 y    = 0.1*(v-2).*(v-7) + 0.2randn(N)
 nvec = 2:100
 lcurve = map(nvec) do n

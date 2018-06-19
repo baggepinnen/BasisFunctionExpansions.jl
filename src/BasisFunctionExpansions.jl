@@ -278,13 +278,13 @@ end
 """
 function get_centers_automatic(v::AbstractVector,Nv::Int,coulomb = false)
     if coulomb # If Coulomb setting is activated, double the number of basis functions and clip the activation at zero velocity (useful for data that exhibits a discontinuity at v=0, like coulomb friction)
-        vc    = linspace(0,maximum(abs.(v)),Nv+2)
+        vc    = range(0, stop=maximum(abs.(v)), length=Nv+2)
         vc    = vc[2:end-1]
         vc    = [-vc[end:-1:1]; vc]
         Nv    = 2Nv
         gamma = (Nv/(abs(vc[1]-vc[end])))^2
     else
-        vc    = linspace(minimum(v),maximum(v),Nv)
+        vc    = range(minimum(v), stop=maximum(v), length=Nv)
         gamma = (Nv/(abs(vc[1]-vc[end])))^2
     end
     vc,gamma
@@ -311,7 +311,7 @@ function get_centers(bounds, Nv, coulomb=false, coulombdims=0)
     @assert !coulomb "Coulomb not yet supported for multi-dimensional BFEs"
     dims     = length(Nv)
     interval = [(bounds[n,2]-bounds[n,1])/Nv[n] for n = 1:dims]
-    C = [linspace(bounds[n,1]+interval[n]/2,bounds[n,2]-interval[n]/2,(Nv)[n]) for n = 1:dims]
+    C = [range(bounds[n,1]+interval[n]/2, stop=bounds[n,2]-interval[n]/2, length=(Nv)[n]) for n = 1:dims]
 
     Nbasis  = prod(Nv)
     centers = zeros(dims, Nbasis)
@@ -343,8 +343,8 @@ function get_centers_Kmeans(v, nc::Int; verbose=false)
         end
         errorvec[iter] = clusterresult.totalcost
     end
-    verbose && println("Std in errors among initial centers: ", round(std(errorvec),6))
-    ind = indmin(errorvec)
+    verbose && println("Std in errors among initial centers: ", round(std(errorvec), digits=6))
+    ind = argmin(errorvec)
     return μ[:,ind], Σ[:,ind]
 end
 
