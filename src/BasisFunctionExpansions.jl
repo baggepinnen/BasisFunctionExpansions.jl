@@ -1,5 +1,5 @@
 module BasisFunctionExpansions
-using Clustering
+using Clustering, DSP
 export BasisFunctionExpansion, UniformRBFE, MultiUniformRBFE, MultiDiagonalRBFE, MultiRBFE, BasisFunctionApproximation
 export get_centers, get_centers_multi, get_centers_automatic, quadform, γ2σ, σ2γ
 export toeplitz, getARregressor, getARXregressor, LPVSS, predict, output_variance
@@ -190,7 +190,7 @@ squared_exponential(v::AbstractVector,vc,gamma::AbstractVector) = exp.(-((vc'.-v
 function squared_exponential(v::AbstractMatrix{T},vc,gamma::AbstractVector) where T
     a = Matrix{T}(size(v,1),size(vc,2))
     for i = 1:size(v,1)
-        a[i,:] = exp.(-sum(gamma.*(v[i,:].-vc).^2,1))
+        a[i,:] = exp.(-sum(gamma.*(v[i,:].-vc).^2,dims=1))
     end
     a
 end
