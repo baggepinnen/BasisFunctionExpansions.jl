@@ -1,0 +1,10 @@
+name = "BasisFunctionExpansions"
+uuid = "c2e5db7b-ba35-5c58-a4dc-ed95fff8f2aa"
+author = ["Fredrik Bagge Carlson <baggepinnen@gmail.com>"]
+version = "0.0.3"
+
+[deps]
+Clustering = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
+ColorTypes = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
+DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
+PlotRecipes = "0e44f1d2-4516-5e7d-9182-378ae59e766c"
