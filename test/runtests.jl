@@ -1,5 +1,5 @@
 using BasisFunctionExpansions
-using Base.Test
+using Test
 
 # write your own tests here
 @test BasisFunctionExpansions.get_centers_automatic(1:10,5,false)[1] |> length == 5
@@ -12,7 +12,7 @@ rbf = UniformRBFE(1:3, 5)
 @test size(rbf(randn(10))) == (10,5)
 @test size(rbf(randn())) == (5,)
 
-x = linspace(0,4,50)
+x = range(0, stop=4, length=50)
 a = rbf(x)
 @test a[1] == a[end] # Should be completely symmetric in this case
 @test isa(rbf, BasisFunctionExpansion{1})
@@ -30,7 +30,7 @@ rbf = MultiUniformRBFE(v,Nv)
 
 # Single dim
 N    = 1000
-v    = linspace(0,10,N)
+v    = range(0, stop=10, length=N)
 y    = randn(N)
 y    = filt(ones(500)/500,[1],y)
 Nv   = 10
@@ -43,7 +43,7 @@ e = y-yhat
 
 # Multidim
 N    = 1000
-x    = linspace(0,2pi-0.2,N)
+x    = range(0, stop=2pi-0.2, length=N)
 v    = [cos.(x) sin.(x)].*x
 y    = randn(N)
 y    = filt(ones(500)/500,[1],y)
@@ -60,7 +60,7 @@ e = y-yhat
 
 # Multidim Diagonal
 N    = 1000
-x    = linspace(0,2pi-0.2,N)
+x    = range(0, stop=2pi-0.2, length=N)
 v    = [cos.(x) sin.(x)].*x
 y    = randn(N)
 y    = filt(ones(500)/500,[1],y)
@@ -79,7 +79,7 @@ e = y-yhat
 # Multidim
 # using BasisFunctionExpansions, Plots
 N    = 1000
-x    = linspace(0,2pi-0.2,N)
+x    = range(0, stop=2pi-0.2, length=N)
 v    = [cos.(x) sin.(x)].*x
 y    = randn(N)
 y    = filt(ones(500)/500,[1],y)
