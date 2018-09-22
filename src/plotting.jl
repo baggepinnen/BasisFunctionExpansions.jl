@@ -22,8 +22,8 @@ end
     seriestype --> :surface
 
     c       = rbf.μ
-    minb    = minimum(c,2)
-    maxb    = maximum(c,2)
+    minb    = minimum(c,dims=2)
+    maxb    = maximum(c,dims=2)
     dist    = maxb-minb
     Npoints = 50
     v = [linspace(mi, ma, Npoints) for (mi,ma) in zip(minb,maxb)]

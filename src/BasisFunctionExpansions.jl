@@ -1,11 +1,11 @@
 module BasisFunctionExpansions
-using Clustering
+using Clustering, LinearAlgebra, Statistics
 export BasisFunctionExpansion, UniformRBFE, MultiUniformRBFE, MultiDiagonalRBFE, MultiRBFE, BasisFunctionApproximation
 export get_centers, get_centers_multi, get_centers_automatic, quadform, γ2σ, σ2γ
 export toeplitz, getARregressor, getARXregressor, LPVSS, predict, output_variance
 
 ## Types
-abstract type BasisFunctionExpansion{N} end
+abstract type BasisFunctionExpansion end
 
 # function Base.show{N}(io::IO,b::BasisFunctionExpansion{N})
 #     s = string(typeof(b),"\n")
@@ -15,8 +15,8 @@ abstract type BasisFunctionExpansion{N} end
 #     print(io,s)
 # end
 
-struct BasisFunctionApproximation
-    bfe::BasisFunctionExpansion
+struct BasisFunctionApproximation{BFE <: BasisFunctionExpansion}
+    bfe::BFE
     linear_combination::Vector{Float64}
 end
 
@@ -46,9 +46,9 @@ end
 """
 A Uniform RBFE has the same variance for all basis functions
 """
-struct UniformRBFE <: BasisFunctionExpansion{1}
-    activation::Function
-    μ::Vector{Float64}
+struct UniformRBFE{F,VT} <: BasisFunctionExpansion
+    activation::F
+    μ::VT
     σ::Float64
 end
 
@@ -79,10 +79,10 @@ end
 A `MultiUniformRBFE` has the same diagonal covariance matrix for all basis functions
 See also `MultiDiagonalRBFE`, which has different covariance matrices for all basis functions
 """
-struct MultiUniformRBFE{N} <: BasisFunctionExpansion{N}
-    activation::Function
-    μ::Matrix{Float64}
-    Σ::Vector{Float64}
+struct MultiUniformRBFE{F,MT<:AbstractMatrix,VT<:AbstractVector} <: BasisFunctionExpansion
+    activation::F
+    μ::MT
+    Σ::VT
 end
 
 """
@@ -91,7 +91,7 @@ end
 Supply all parameters. Σ is the diagonal of the covariance matrix
 """
 function MultiUniformRBFE(μ::AbstractMatrix, Σ::AbstractVector, activation)
-    MultiUniformRBFE{size(μ,1)}(v->activation(v,μ,σ2γ(Σ)),μ,Σ)
+    MultiUniformRBFE(v->activation(v,μ,σ2γ(Σ)),μ,Σ)
 end
 
 """
@@ -105,7 +105,7 @@ function MultiUniformRBFE(v::AbstractMatrix, Nv::AbstractVector{Int}; normalize=
     @assert !coulomb "Coulomb not yet supported for multi-dimensional BFEs"
     @assert length(Nv) == size(v,2)
     activation, μ, γ = basis_activation_func_automatic(v,Nv,normalize,coulomb)
-    MultiUniformRBFE{length(Nv)}(activation,μ,γ2σ.(γ))
+    MultiUniformRBFE(activation,μ,γ2σ.(γ))
 end
 
 
@@ -115,10 +115,10 @@ end
 A `MultiDiagonalRBFE` has different diagonal covariance matrices for all basis functions
 See also `MultiUniformRBFE`, which has the same covariance matrix for all basis functions
 """
-struct MultiDiagonalRBFE{N} <: BasisFunctionExpansion{N}
-    activation::Function
-    μ::Matrix{Float64}
-    Σ::Vector{Vector{Float64}}
+struct MultiDiagonalRBFE{F,MT<:AbstractMatrix,VT<:AbstractVector} <: BasisFunctionExpansion
+    activation::F
+    μ::MT
+    Σ::Vector{VT}
 end
 
 """
@@ -127,7 +127,7 @@ end
 Supply all parameters. Σ is the diagonals of the covariance matrices
 """
 function MultiDiagonalRBFE(μ::AbstractMatrix, Σ::AbstractVector{T}, activation) where T <: AbstractVector
-    MultiDiagonalRBFE{size(μ,1)}(v->activation(v,μ,σ2γ(Σ)),μ,Σ)
+    MultiDiagonalRBFE(v->activation(v,μ,σ2γ(Σ)),μ,Σ)
 end
 
 """
@@ -143,7 +143,7 @@ function MultiDiagonalRBFE(v::AbstractMatrix, nc; normalize=false, coulomb=false
     μ = hcat(μ...)
     Σ = [2diag(Σi) for Σi in Σ] # Heuristically inflate covariance by 2 "On the Kernel Widths in Radial-Basis Function Networks" NABIL BENOUDJIT and MICHEL VERLEYSEN
     activation = basis_activation_func(μ,σ2γ(Σ),normalize,coulomb)
-    MultiDiagonalRBFE{size(v,2)}(activation,μ,Σ)
+    MultiDiagonalRBFE(activation,μ,Σ)
 end
 
 ## MultiRBFE =======================================================================
@@ -151,10 +151,10 @@ end
 A `MultiRBFE` has different diagonal covariance matrices for all basis functions
 See also `MultiUniformRBFE`, which has the same covariance matrix for all basis functions
 """
-struct MultiRBFE{N} <: BasisFunctionExpansion{N}
-    activation::Function
-    μ::Matrix{Float64}
-    Σ::Vector{Matrix{Float64}}
+struct MultiRBFE{F,MT<:AbstractMatrix,MTs} <: BasisFunctionExpansion
+    activation::F
+    μ::MT
+    Σ::Vector{MTs}
 end
 
 """
@@ -163,7 +163,7 @@ end
 Supply all parameters. Σ is the diagonals of the covariance matrices
 """
 function MultiRBFE(μ::AbstractMatrix, Σ::AbstractVector{T}, activation) where T <: AbstractVector
-    MultiRBFE{size(μ,1)}(v->activation(v,μ,σ2γ(Σ)),μ,Σ)
+    MultiRBFE(v->activation(v,μ,σ2γ(Σ)),μ,Σ)
 end
 
 """
@@ -179,7 +179,7 @@ function MultiRBFE(v::AbstractMatrix, nc; normalize=false, coulomb=false)
     μ = hcat(μ...)
     Σ .*= 3 # Heuristically inflate covariance by 3 "On the Kernel Widths in Radial-Basis Function Networks" NABIL BENOUDJIT and MICHEL VERLEYSEN
     activation = basis_activation_func(μ,σ2γ(Σ),normalize,coulomb)
-    MultiRBFE{size(v,2)}(activation,μ,Σ)
+    MultiRBFE(activation,μ,Σ)
 end
 
 ## Squared exponential functions
@@ -188,9 +188,9 @@ squared_exponential(v::Real,vc,gamma) = exp.(-gamma*(v.-vc).^2)
 squared_exponential(v::AbstractVector,vc,gamma::Number) = exp.(-gamma*(v.-vc').^2)
 squared_exponential(v::AbstractVector,vc,gamma::AbstractVector) = exp.(-((vc'.-v').^2)*gamma)
 function squared_exponential(v::AbstractMatrix{T},vc,gamma::AbstractVector) where T
-    a = Matrix{T}(size(v,1),size(vc,2))
+    a = Matrix{T}(undef,size(v,1),size(vc,2))
     for i = 1:size(v,1)
-        a[i,:] = exp.(-sum(gamma.*(v[i,:].-vc).^2,1))
+        a[i,:] = exp.(-sum(gamma.*(v[i,:].-vc).^2, dims=1))
     end
     a
 end
@@ -218,7 +218,7 @@ end
 
 function normalized_squared_exponential(v,vc,gamma::Number)
     r = squared_exponential(v,vc,gamma)
-    r ./= (sum(r,2) + 1e-8)
+    r ./= (sum(r,dims=2) .+ 1e-8)
 end
 
 function normalized_squared_exponential(v::AbstractVector,vc,gamma::AbstractVector)
@@ -228,14 +228,14 @@ end
 
 function normalized_squared_exponential(v::AbstractMatrix,vc,gamma::AbstractVector)
     r = squared_exponential(v,vc,gamma)
-    r ./= (sum(r,2) + 1e-8)
+    r ./= (sum(r,dims=2) .+ 1e-8)
 end
 
 squared_exponential_coulomb(v,vc,gamma) = squared_exponential(v,vc,gamma).*(sign(v) .== sign(vc))
 
 function normalized_squared_exponential_coulomb(v,vc,gamma)
     r = squared_exponential_coulomb(v,vc,gamma)
-    r ./= (sum(r,2) + 1e-8)
+    r ./= (sum(r,dims=2) .+ 1e-8)
 end
 
 function squared_exponential(v::AbstractMatrix,vc, sigma, velocity::Int=0)
@@ -297,8 +297,8 @@ function get_centers_automatic(v::AbstractMatrix, Nv::AbstractVector{Int}, coulo
     @assert !coulomb "Coulomb not yet supported for multi-dimensional BFEs"
     @assert size(v,2) == length(Nv) "size(v,2) != length(Nv)"
     dims   = size(v,2)
-    minq   = minimum(v,1)[:]
-    maxq   = maximum(v,1)[:]
+    minq   = minimum(v,dims=1)[:]
+    maxq   = maximum(v,dims=1)[:]
     bounds = [minq maxq]
     get_centers(bounds, Nv)
 end
@@ -319,7 +319,7 @@ function get_centers(bounds, Nv, coulomb=false, coulombdims=0)
     h       = 1
     for i = 1:dims
         v = v ÷ Nv[i]
-        centers[i,:] = vec(repmat(C[i]',v,h))'
+        centers[i,:] = vec(repeat(C[i]',v,h))'
         h *= Nv[i]
     end
     centers, (1 ./interval).^2
@@ -328,14 +328,13 @@ end
 function get_centers_Kmeans(v, nc::Int; verbose=false)
     iters = 21
     n_state = size(v,2)
-    errorvec = fill(0,iters)
-    params = Array{Float64}(nc*2*n_state,iters)
+    errorvec = fill(0.,iters)
     methods = [:rand;:kmpp]
-    Σ = [fill(0,n_state,n_state) for i = 1:nc, j = 1:iters]
-    μ = [fill(0,n_state) for i = 1:nc, j = 1:iters]
+    Σ = [fill(0.,n_state,n_state) for i = 1:nc, j = 1:iters]
+    μ = [fill(0.,n_state) for i = 1:nc, j = 1:iters]
 
     for iter = 1:iters
-        clusterresult = Clustering.kmeans(v', nc; maxiter=200, display=:none, init=iter<iters ? methods[iter%2+1] : :kmcen)
+        clusterresult = Clustering.kmeans(copy(v'), nc; maxiter=200, display=:none, init=iter<iters ? methods[iter%2+1] : :kmcen)
         for i = 1:nc
             si = 1+(i-1)n_state*2
             μ[i,iter] .= clusterresult.centers[:,i]

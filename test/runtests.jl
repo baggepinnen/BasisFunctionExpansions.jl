@@ -1,5 +1,5 @@
 using BasisFunctionExpansions
-using Test
+using Test, DSP, LinearAlgebra, Statistics
 
 # write your own tests here
 @test BasisFunctionExpansions.get_centers_automatic(1:10,5,false)[1] |> length == 5
@@ -15,8 +15,7 @@ rbf = UniformRBFE(1:3, 5)
 x = range(0, stop=4, length=50)
 a = rbf(x)
 @test a[1] == a[end] # Should be completely symmetric in this case
-@test isa(rbf, BasisFunctionExpansion{1})
-@test !isa(rbf, BasisFunctionExpansion{2})
+@test isa(rbf, BasisFunctionExpansion)
 
 
 
@@ -52,7 +51,7 @@ rbf  = MultiUniformRBFE(v,Nv, normalize=true)
 bfa  = BasisFunctionApproximation(y,v,rbf,0.0001)
 yhat = bfa(v)
 e = y-yhat
-@test isapprox.(sum(rbf(randn(10,2)), 2), 1, atol=1e-7) |> all
+@test isapprox.(sum(rbf(randn(10,2)), dims=2), 1, atol=1e-7) |> all
 @test √(mean(e.^2)) < 0.08
 # plot(rbf)
 
@@ -71,7 +70,7 @@ yhat = bfa(v)
 e = y-yhat
 √(mean(e.^2))
 
-# @test isapprox.(sum(rbf(randn(10,2)), 2), 1, atol=1e-7) |> all
+# @test isapprox.(sum(rbf(randn(10,2)), dims=2), 1, atol=1e-7) |> all
 @test √(mean(e.^2)) < 0.02
 
 
@@ -90,7 +89,7 @@ yhat = bfa(v)
 e = y-yhat
 √(mean(e.^2))
 
-# @test isapprox.(sum(rbf(randn(10,2)), 2), 1, atol=1e-7) |> all
+# @test isapprox.(sum(rbf(randn(10,2)), dims=2), 1, atol=1e-7) |> all
 @test √(mean(e.^2)) < 0.02
 # scatter3d(v[:,1],v[:,2],y, lab="Signal")
 # scatter3d!(v[:,1],v[:,2],yhat, lab="Reconstruction")

@@ -1,6 +1,7 @@
 # BasisFunctionExpansions
 
 [![BasisFunctionExpansions](http://pkg.julialang.org/badges/BasisFunctionExpansions_0.6.svg)](http://pkg.julialang.org/?pkg=BasisFunctionExpansions)
+[![BasisFunctionExpansions](http://pkg.julialang.org/badges/BasisFunctionExpansions_1.0.svg)](http://pkg.julialang.org/?pkg=BasisFunctionExpansions)
 [![Build Status](https://travis-ci.org/baggepinnen/BasisFunctionExpansions.jl.svg?branch=master)](https://travis-ci.org/baggepinnen/BasisFunctionExpansions.jl)
 [![codecov](https://codecov.io/gh/baggepinnen/BasisFunctionExpansions.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/baggepinnen/BasisFunctionExpansions.jl)
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://baggepinnen.github.io/BasisFunctionExpansions.jl/stable)
@@ -28,6 +29,7 @@ Plotting functionality requires `Plots.jl`
 ## Single dimension
 We start by simulating a signal `y` and a scheduling signal `v`. The task is to estimate a function `y = ϕ(v)`, where `ϕ` is a basis function expansion.
 ```julia
+using DSP # For filt
 N = 1000
 v = range(0, stop=10, length=N) # Scheduling signal
 y = randn(N) # Signal to be approximated
@@ -36,6 +38,7 @@ y = filt(ones(500)/500,[1],y)
 
 Next, we setup the basis function expansion object `rbf` and use it to create a reconstruction object `bfa`
 ```julia
+using BasisFunctionExpansions, Plots
 Nv  = 10 # Number of basis functions
 rbf = UniformRBFE(v,Nv, normalize=true) # Approximate using radial basis functions with constant width
 bfa = BasisFunctionApproximation(y,v,rbf,1) # Create approximation object
@@ -49,7 +52,7 @@ For comparison, we can also plot the regular linear regression `y = α₀ + α�
 ```julia
 A = v.^(0:3)'
 ŷ_linreg = [A[:,1:i]*(A[:,1:i]\y) for i=2:4]
-plot!(v,hcat(ŷ_linreg...), lab=["Linear regression order $i" for i=1:3]')
+plot!(v,hcat(ŷ_linreg...), lab=reshape(["Linear regression order $i" for i=1:3],1,:))
 ```
 ![window](figs/onedim.png)
 
@@ -59,12 +62,12 @@ As we can see from the figure, the linear combination of basis functions forming
 ## Multiple dimensions
 We now demonstrate the same thing but with `v ∈ ℜ²`. To create a nice plot, we let `v` form a spiral with increasing radius.
 ```julia
-using BasisFunctionExpansions
+using BasisFunctionExpansions, DSP
 N = 1000
 x = range(0, stop=4pi, length=N)
-v = [cos(x) sin(x)].*x # Scheduling signal
+v = [cos.(x) sin.(x)].*x # Scheduling signal
 y = randn(N) # Signal to be approximated
-y = filt(ones(500)/500,[1],y)
+y = filt(ones(500)./500,[1],y)
 ```
 
 Now we're creating a two-dimensional basis function expansion using ten functions in each dimension (for a total of 10*10=100 parameters).
@@ -206,7 +209,7 @@ See `?ReverseDiff.gradient` for tips regarding high performance gradient calcula
 ```julia
 N   = 200
 v   = range(0, stop=10, length=N)
-y   = 0.1*(v-2).*(v-7) + 0.2randn(N)
+y   = 0.1.*(v.-2).*(v.-7) .+ 0.2randn(N)
 rbf = UniformRBFE(v, 5, normalize = true)
 bfa = BasisFunctionApproximation(y,v,rbf)
 
@@ -221,7 +224,7 @@ A simple way of choosing the number of basis functions is to plot an L-curve (pa
 ```julia
 N    = 200
 v    = range(0, stop=10, length=N)
-y    = 0.1*(v-2).*(v-7) + 0.2randn(N)
+y    = 0.1.*(v.-2).*(v.-7) .+ 0.2randn(N)
 nvec = 2:100
 lcurve = map(nvec) do n
   rbf = UniformRBFE(v, n, normalize = true)

@@ -55,7 +55,7 @@ plot([yr bfa(A)], lab=["Signal" "Prediction"])
 See README (`?BasisFunctionExpansions`) for more details
 """
 function getARXregressor(y::AbstractVector,u::AbstractVecOrMat, na, nb)
-    assert(length(nb) == size(u,2))
+    @assert(length(nb) == size(u,2))
     m    = max(na+1,maximum(nb))
     n    = length(y) - m+1
     offs = m-na-1
@@ -161,13 +161,13 @@ function LPVSS(x, u, v::AbstractVecOrMat, nc; normalize=true, λ = 1e-3)
 end
 
 function mega_regressor(bfe,v,A)
-    nc = length(bfe.μ) ÷ supertype(typeof(bfe)).parameters[1]
+    nc = length(bfe.μ) ÷ (ndims(v) > 1 ? size(v,2) : 1)
     ϕ = bfe(v)
     if isa(ϕ, Vector)
         ϕ = ϕ'
     end
-    ϕ = repmat(ϕ,1,size(A,2)) # Extend activations from nc to nc×(n+m)
-    ϕ = ϕ.* repmat(A,1,nc)  # Extend regressor from n+m to nc×(n+m)
+    ϕ = repeat(ϕ,1,size(A,2)) # Extend activations from nc to nc×(n+m)
+    ϕ = ϕ.* repeat(A,1,nc)  # Extend regressor from n+m to nc×(n+m)
 end
 
 shorten_v(v::AbstractVector) = v[1:end-1]
@@ -180,8 +180,8 @@ function fit_ss(x,u,v,bfe,λ)
     end
     ϕ = mega_regressor(bfe,v,A)
     p = size(ϕ,2)
-    B = factorize(λ == 0 ? ϕ : [ϕ; λ*I])
-    params = mapslices(y,1) do y
+    B = qr(λ == 0 ? ϕ : [ϕ; λ*I])
+    params = mapslices(y,dims=1) do y
         if λ == 0
             x = B\y
         else
@@ -189,8 +189,8 @@ function fit_ss(x,u,v,bfe,λ)
         end
     end # We now have n vectors of nc(n+m) parameters = nc(n+m)×n
     σ = [std(y[:,i] - ϕ*params[:,i]) for i =1:size(params,2)]
-    ATA = cholfact(Hermitian(B[:R]'B[:R]))
-    cov = λ == 0 ? inv(ATA) : ATA\(ϕ'ϕ)/full(ATA) # / not defined for factorizations https://github.com/JuliaLang/julia/issues/12436
+    ATA = Cholesky(B.R,:U,0) # TODO: Isn't R already a cholesky factor of R'R??
+    cov = λ == 0 ? inv(ATA) : ATA\(ϕ'ϕ)/Matrix(ATA) # / not defined for factorizations https://github.com/JuliaLang/julia/issues/12436
 
     # icov = cholfact(Hermitian(q))
     # icov = cholfact(Symmetric(q[:R]'q[:R]))
@@ -198,20 +198,10 @@ function fit_ss(x,u,v,bfe,λ)
 end
 
 """
-    predict(model::LPVSS, x::AbstractMatrix, u)
-
-Return a prediction of the output `x'` given the state `x` and input `u`
-This function is called when a `model::LPVSS` object is called like `model(x,u)`
-"""
-function predict(model::LPVSS, x::AbstractMatrix, u)
-    v = [x u]
-    predict(model, x, u, v)
-end
-
-"""
     predict(model::LPVSS, x::AbstractMatrix, u, v=[x u])
 
 If no `v` provided, return a prediction of the output `x'` given the state `x` and input `u`
+This function is called when a `model::LPVSS` object is called like `model(x,u)`
 
 Provided `v`, return a prediction of the output `x'` given the state `x`, input `u` and
 scheduling parameter `v`
