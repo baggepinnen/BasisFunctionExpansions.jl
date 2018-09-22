@@ -1,5 +1,6 @@
 using BasisFunctionExpansions
-using Test, DSP, LinearAlgebra, Statistics
+using Test, DSP, LinearAlgebra, Statistics, Random
+Random.seed!(0)
 
 # write your own tests here
 @test BasisFunctionExpansions.get_centers_automatic(1:10,5,false)[1] |> length == 5
