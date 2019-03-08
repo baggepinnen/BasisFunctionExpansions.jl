@@ -5,7 +5,7 @@
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://baggepinnen.github.io/BasisFunctionExpansions.jl/stable)
 [![](https://img.shields.io/badge/docs-latest-blue.svg) (Latest is recommended)](https://baggepinnen.github.io/BasisFunctionExpansions.jl/latest)
 
-A Julia toolbox for approximation of functions using basis function expansions (BFEs).
+A Julia toolbox for approximation of functions using basis-function expansions (BFEs).
 
 BFEs are useful when one wants to estimate an arbitrary/unknown/complicated functional relationship between (in the simple case) two variables, `y` and `v`. In simple linear regression, we might consider a functional relationship `y = ϕ(v) = αv + β`, with parameters `α` and `β`. However, if the function `ϕ` has an arbitrary nonlinar form, it might be hard to come up with suitable basis functions to use for linear regression. This package provides a set of convenient methods to estimate `ϕ(v)` as a linear combination of basis functions, such as radial basis functions, for situations where `v` has a single or multiple dimensions.
 
@@ -25,7 +25,7 @@ To reconstruct a signal, a linear combination of basis functions must be estimat
 Plotting functionality requires `Plots.jl`
 
 ## Single dimension
-We start by simulating a signal `y` and a scheduling signal `v`. The task is to estimate a function `y = ϕ(v)`, where `ϕ` is a basis function expansion.
+We start by simulating a signal `y` and a scheduling signal `v`. The task is to estimate a function `y = ϕ(v)`, where `ϕ` is a basis-function expansion.
 ```julia
 using DSP # For filt
 N = 1000
@@ -34,7 +34,7 @@ y = randn(N) # Signal to be approximated
 y = filt(ones(500)/500,[1],y)
 ```
 
-Next, we setup the basis function expansion object `rbf` and use it to create a reconstruction object `bfa`
+Next, we setup the basis-function expansion object `rbf` and use it to create a reconstruction object `bfa`
 ```julia
 using BasisFunctionExpansions, Plots
 Nv  = 10 # Number of basis functions
@@ -68,7 +68,7 @@ y = randn(N) # Signal to be approximated
 y = filt(ones(500)./500,[1],y)
 ```
 
-Now we're creating a two-dimensional basis function expansion using ten functions in each dimension (for a total of 10*10=100 parameters).
+Now we're creating a two-dimensional basis-function expansion using ten functions in each dimension (for a total of 10*10=100 parameters).
 ```julia
 Nv  = [10,10] # Number of basis functions along each dimension
 rbf = MultiUniformRBFE(v,Nv, normalize=true) # Approximate using radial basis functions with constant width (Not isotropic, but all functions have the same diagonal covariance matrix)
@@ -109,7 +109,7 @@ scatter3d!(v[:,1],v[:,2],yhat, lab="Reconstruction")
 
 # Dynamics modeling
 ## LPV ARX modeling
-We can use basis function expansions for identification of elementary, non-linear dynamics models.
+We can use basis-function expansions for identification of elementary, non-linear dynamics models.
 Consider the following dynamical system, with a non-linearity on the input
 `A(z)y = B(z)√(|u|)`
 We can simulate this system using the code
@@ -167,18 +167,6 @@ Bagge Carlson, Fredrik; Robertsson, Anders and Johansson, Rolf
 Bagge Carlson, Fredrik; Robertsson, Anders and Johansson, Rolf
 (2015) IEEE/RSJ International Conference on Intelligent Robots and Systems](http://lup.lub.lu.se/record/7613758)
 
-## Citing
-Users of this package for academic purposes are encouraged to cite the following thesis, for which the software was developed.
-```bibtex
-@thesis{bagge2017,
-  author       = {Bagge Carlson, Fredrik},
-  month        = {03},
-  note         = {Licentiate Thesis},
-  publisher    = {Department of Automatic Control, Lund University},
-  title        = {Modeling and Estimation Topics in Robotics},
-  year         = {2017},
-}
-```
 
 # Gradients
 BasisFunctionExpansions plays nice with [ReverseDiff.jl](https://github.com/JuliaDiff/ReverseDiff.jl) and [ForwardDiff.jl](https://github.com/JuliaDiff/ForwardDiff.jl)
