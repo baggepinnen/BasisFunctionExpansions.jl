@@ -1,7 +1,5 @@
 # BasisFunctionExpansions
 
-[![BasisFunctionExpansions](http://pkg.julialang.org/badges/BasisFunctionExpansions_0.6.svg)](http://pkg.julialang.org/?pkg=BasisFunctionExpansions)
-[![BasisFunctionExpansions](http://pkg.julialang.org/badges/BasisFunctionExpansions_1.0.svg)](http://pkg.julialang.org/?pkg=BasisFunctionExpansions)
 [![Build Status](https://travis-ci.org/baggepinnen/BasisFunctionExpansions.jl.svg?branch=master)](https://travis-ci.org/baggepinnen/BasisFunctionExpansions.jl)
 [![codecov](https://codecov.io/gh/baggepinnen/BasisFunctionExpansions.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/baggepinnen/BasisFunctionExpansions.jl)
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://baggepinnen.github.io/BasisFunctionExpansions.jl/stable)
