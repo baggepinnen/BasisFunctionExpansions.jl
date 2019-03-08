@@ -420,7 +420,7 @@ Generate `T` time steps of state-space data where the A-matrix changes from
 `r` is the seed to the random number generator.
 """
 function testdata(T_,r=1)
-    srand(r)
+    Random.seed!(r)
     n,m      = 2,1
     At_      = [0.95 0.1; 0 0.95]
     Bt_      = reshape([0.2; 1],2,1)
