@@ -10,7 +10,7 @@ DSP = "717857b8-e6f2-59f4-9121-6e50c889abd2"
 RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 
 [compat]
-julia = 1
+julia = "1"
 Clustering = "0.14"
 ColorTypes = "0.10"
 DSP = "0.6"
