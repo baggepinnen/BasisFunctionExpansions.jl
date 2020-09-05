@@ -122,18 +122,18 @@ y = filt(B,A,sqrt.(abs.(u)))
 
 We can now try to fit a regular ARX model to this input-output data
 ```julia
-yr,A  = getARXregressor(y,u,3,2) # We assume that we know the system order 3,2
+yr,A  = getARXregressor(y,u,2,2) # We assume that we know the system order 3,2
 x     = A\yr                     # Fit using standard least-squares
-e_arx = √(mean((yr - A*x).^2))   # Calculate RMS error (4.2553882233771025)
+e_arx = √(mean((yr - A*x).^2))   # Calculate RMS error (11.2)
 plot([yr A*x], lab=["Signal" "ARX prediction"])
 ```
 ![window](figs/arx.png)
 
-Due to the non-linearity at the input of the system, the linear model fails to fit the data well. Our next attempt is a non-linear model based on BFEs. We select the simplest form of multi-dimensional BFE, `MultiUniformRBFE` and further select to cover the state-space with 2 basis functions along each dimension corresponding to `y`, and 4 basis functions along each dimension corresponding to `u` for a total of 2^2*4^3=256 parameters (4 basis functions is the smallest number that can somewhat accurately fit `√(|u|)`). The number of parameters in this case is large compared to the number of data points, we will need some regularization to fit this model properly. The regularization choice is made when forming the `BasisFunctionApproximation` and the strength is determined by the last argument `1e-3` in this case.
+Due to the non-linearity at the input of the system, the linear model fails to fit the data well. Our next attempt is a non-linear model based on BFEs. We select the simplest form of multi-dimensional BFE, `MultiUniformRBFE` and further select to cover the state-space with a single basis functions along each dimension corresponding to `y`, which falls back onto a linear function, and 4 basis functions along each dimension corresponding to `u` for a total of 1^2*4^2=16 parameters (4 basis functions is the smallest number that can somewhat accurately fit `√(|u|)`). The number of parameters in this case is large compared to the number of data points, we will need some regularization to fit this model properly. The regularization choice is made when forming the `BasisFunctionApproximation` and the strength is determined by the last argument `1e-3` in this case.
 ```julia
-bfe   = MultiUniformRBFE(A,[2,2,4,4,4], normalize=true)
+bfe   = MultiUniformRBFE(A,[1,1,4,4], normalize=true)
 bfa   = BasisFunctionApproximation(yr,A,bfe, 1e-3)
-e_bfe = √(mean((yr - bfa(A)).^2)) # (0.005174261451622258)
+e_bfe = √(mean((yr - bfa(A)).^2)) # (3.11)
 ```
 ![window](figs/bfe.png)
 

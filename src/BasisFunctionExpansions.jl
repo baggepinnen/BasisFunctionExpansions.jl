@@ -99,13 +99,24 @@ end
 
 Supply scheduling signal and number of basis functions For automatic selection of centers and widths
 
-The keyword `normalize` determines weather or not basis function activations are normalized to sum to one for each datapoint, normalized networks tend to extrapolate better ["The normalized radial basis function neural network" DOI: 10.1109/ICSMC.1998.728118](http://ieeexplore.ieee.org/document/728118/)
+The keyword `normalize` determines whether or not basis function activations are normalized to sum to one for each datapoint, normalized networks tend to extrapolate better ["The normalized radial basis function neural network" DOI: 10.1109/ICSMC.1998.728118](http://ieeexplore.ieee.org/document/728118/)
 """
 function MultiUniformRBFE(v::AbstractMatrix, Nv::AbstractVector{Int}; normalize=false, coulomb=false)
     @assert !coulomb "Coulomb not yet supported for multi-dimensional BFEs"
     @assert length(Nv) == size(v,2)
-    activation, μ, γ = basis_activation_func_automatic(v,Nv,normalize,coulomb)
-    MultiUniformRBFE(activation,μ,γ2σ.(γ))
+    has_linear = any(==(1), Nv)
+    if has_linear
+        linear_inds = Nv .== 1
+        v_nl = v[:,.!linear_inds]
+        Nv_nl = Nv[.!linear_inds]
+    else
+        v_nl, Nv_nl = v, Nv
+    end
+    activation, μ, γ = basis_activation_func_automatic(v_nl,Nv_nl,normalize,coulomb)
+    if has_linear
+        activation_lnl = (v) -> [v[:,linear_inds]  activation(v[:,.!linear_inds])]
+    end
+    MultiUniformRBFE(has_linear ? activation_lnl : activation, μ, γ2σ.(γ))
 end
 
 

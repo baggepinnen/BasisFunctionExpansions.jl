@@ -2,7 +2,10 @@ using BasisFunctionExpansions
 using Test, DSP, LinearAlgebra, Statistics, Random
 Random.seed!(0)
 
-# write your own tests here
+@testset "BasisFunctionExpansions" begin
+    @info "Testing BasisFunctionExpansions"
+
+
 @test BasisFunctionExpansions.get_centers_automatic(1:10,5,false)[1] |> length == 5
 @test BasisFunctionExpansions.get_centers_automatic(1:10,5,true)[1] |> length == 10
 
@@ -106,9 +109,9 @@ B = [10,5]
 u = 1randn(T)
 y = filt(B,A,sqrt.(abs.(u)))
 
-yr,A = getARXregressor(y,u,3,2)
+yr,A = getARXregressor(y,u,2,2)
 
-rbf = MultiUniformRBFE(A,[2,2,4,4,4], normalize=true)
+rbf = MultiUniformRBFE(A,[1,1,4,4], normalize=true)
 bfa = BasisFunctionApproximation(yr,A,rbf, 1e-4)
 e = √(mean((yr - bfa(A)).^2))
 x = A\yr
@@ -117,7 +120,13 @@ e2 = √(mean((yr - A*x).^2))
 # plot([yr bfa(A) A*x]); gui()
 
 @test e < e2
-@test e < 0.04
+@test e < 4
 
+@testset "LPVSS" begin
+    @info "Testing LPVSS"
 
-include("test_LPVSS.jl")
+    include("test_LPVSS.jl")
+
+end
+
+end

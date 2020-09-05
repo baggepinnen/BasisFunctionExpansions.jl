@@ -46,25 +46,28 @@ A     = [1,2*0.7*1,1] # A(z) coeffs
 B     = [10,5] # B(z) coeffs
 u     = randn(100) # Simulate 100 time steps with Gaussian input
 y     = filt(B,A,sqrt.(abs.(u)))
-yr,A  = getARXregressor(y,u,3,2) # We assume that we know the system order 3,2
-bfe   = MultiUniformRBFE(A,[2,2,4,4,4], normalize=true)
+yr,A  = getARXregressor(y,u,2,2) # We assume that we know the system order 2,2
+bfe   = MultiUniformRBFE(A,[1,1,4,4,4], normalize=true)
 bfa   = BasisFunctionApproximation(yr,A,bfe, 1e-3)
-e_bfe = √(mean((yr - bfa(A)).^2)) # (0.005174261451622258)
+e_bfe = √(mean((yr - bfa(A)).^2))
 plot([yr bfa(A)], lab=["Signal" "Prediction"])
 ```
 See README (`?BasisFunctionExpansions`) for more details
 """
 function getARXregressor(y::AbstractVector,u::AbstractVecOrMat, na, nb)
-    @assert(length(nb) == size(u,2))
-    m    = max(na+1,maximum(nb))
-    n    = length(y) - m+1
-    offs = m-na-1
-    A    = toeplitz(y[offs+na+1:n+na+offs],y[offs+na+1:-1:1])
-    y    = copy(A[:,1])
+    length(nb) == size(u,2) || throw(ArgumentError("Length of nb must equal number of input signals"))
+    m    = max(na,maximum(nb))+1 # Start of yr
+    @assert m >= 1
+    n    = length(y) - m + 1 # Final length of yr
+    @assert n <= length(y)
+    A    = toeplitz(y[m:m+n-1],y[m:-1:m-na])
+    @assert size(A,2) == na+1
+    y    = A[:,1] # extract yr
     A    = A[:,2:end]
     for i = 1:length(nb)
-        offs = m-nb[i]
-        A = [A toeplitz(u[nb[i]+offs:n+nb[i]+offs-1,i],u[nb[i]+offs:-1:1+offs,i])]
+        nb[i] <= 0 && continue
+        s = m-1
+        A = [A toeplitz(u[s:s+n-1,i],u[s:-1:s-nb[i]+1,i])]
     end
     return y,A
 end
@@ -150,7 +153,7 @@ eRMS <= 0.26
 true
 ```
 """
-function LPVSS(x, u, v::AbstractVecOrMat, nc; normalize=true, λ = 1e-3)
+function LPVSS(x::AbstractArray, u::AbstractArray, v::AbstractVecOrMat, nc; normalize=true, λ = 1e-3)
     if isa(v,AbstractMatrix)
         bfe  = MultiRBFE(v, nc; normalize=normalize)
     else
