@@ -15,9 +15,9 @@ abstract type BasisFunctionExpansion end
 #     print(io,s)
 # end
 
-struct BasisFunctionApproximation{BFE <: BasisFunctionExpansion}
+struct BasisFunctionApproximation{BFE <: BasisFunctionExpansion, T}
     bfe::BFE
-    linear_combination::Vector{Float64}
+    linear_combination::Vector{T}
 end
 
 """
