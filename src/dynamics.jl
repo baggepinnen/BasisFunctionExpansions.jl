@@ -3,14 +3,14 @@
 
 Returns a Toeplitz matrix where `c` is the first column and `r` is the first row.
 """
-function toeplitz(c::AbstractArray{T},r::AbstractArray{T}) where T
+function toeplitz(c::AbstractArray{T}, r::AbstractArray{T}) where T
     nc = length(c)
     nr = length(r)
     A = zeros(T, nc, nr)
     A[:,1] = c
     A[1,:] = r
     @views for i in 2:nr
-        A[2:end,i] = A[1:end-1,i-1]
+        A[2:end,i] = A[1:end - 1,i - 1]
     end
     A
 end
@@ -21,11 +21,11 @@ end
 Returns a shortened output signal `y` and a regressor matrix `A` such that the least-squares
 AR model estimate of order `na` is `y\\A`
 """
-function getARregressor(y::AbstractVector,na)
-    A = toeplitz(y[na+1:end],y[na+1:-1:1])
+function getARregressor(y::AbstractVector, na)
+    A = toeplitz(y[na + 1:end], y[na + 1:-1:1])
     y = copy(A[:,1])
     A = A[:,2:end]
-    return y,A
+    return y, A
 end
 
 """
@@ -54,29 +54,29 @@ plot([yr bfa(A)], lab=["Signal" "Prediction"])
 ```
 See README (`?BasisFunctionExpansions`) for more details
 """
-function getARXregressor(y::AbstractVector,u::AbstractVecOrMat, na, nb)
-    length(nb) == size(u,2) || throw(ArgumentError("Length of nb must equal number of input signals"))
-    m    = max(na,maximum(nb))+1 # Start of yr
+function getARXregressor(y::AbstractVector, u::AbstractVecOrMat, na, nb)
+    length(nb) == size(u, 2) || throw(ArgumentError("Length of nb must equal number of input signals"))
+    m    = max(na, maximum(nb)) + 1 # Start of yr
     @assert m >= 1
     n    = length(y) - m + 1 # Final length of yr
     @assert n <= length(y)
-    A    = toeplitz(y[m:m+n-1],y[m:-1:m-na])
-    @assert size(A,2) == na+1
+    A    = toeplitz(y[m:m + n - 1], y[m:-1:m - na])
+    @assert size(A, 2) == na + 1
     y    = A[:,1] # extract yr
     A    = A[:,2:end]
     for i = 1:length(nb)
         nb[i] <= 0 && continue
-        s = m-1
-        A = [A toeplitz(u[s:s+n-1,i],u[s:-1:s-nb[i]+1,i])]
+        s = m - 1
+        A = [A toeplitz(u[s:s + n - 1,i], u[s:-1:s - nb[i] + 1,i])]
     end
-    return y,A
+    return y, A
 end
 
 "size(y) = (T-1, n)"
-function matricesn(x,u)
-    A = [x[1:end-1,:] u[1:end-1,:]]
+function matricesn(x, u)
+    A = [x[1:end - 1,:] u[1:end - 1,:]]
     y = x[2:end,:]
-    y,A
+    y, A
 end
 
 "Convenience tyoe for estimation of LPV state-space models"
@@ -87,7 +87,7 @@ struct LPVSS
     σ
 end
 
-Base.show(io::IO, model::LPVSS) = print(io,"LPVSS model with $(typeof(model.bfe)) and $(length(model.params)*length(model.params[1])) parameters")
+Base.show(io::IO, model::LPVSS) = print(io, "LPVSS model with $(typeof(model.bfe)) and $(length(model.params) * length(model.params[1])) parameters")
 
 """
     LPVSS(x, u, nc; normalize=true, λ = 1e-3)
@@ -116,10 +116,10 @@ eRMS <= 0.37
 true
 ```
 """
-function LPVSS(x, u, nc; normalize=true, λ = 1e-3)
-    y,A         = matricesn(x,u)
+function LPVSS(x, u, nc; normalize=true, λ=1e-3)
+    y, A         = matricesn(x, u)
     bfe         = MultiRBFE(A, nc; normalize=normalize) # A is sched/regressor matrix
-    params, cov, σ = fit_ss(x,u,A,bfe,λ)
+    params, cov, σ = fit_ss(x, u, A, bfe, λ)
     LPVSS(bfe, params, cov, σ)
 end
 
@@ -153,47 +153,47 @@ eRMS <= 0.26
 true
 ```
 """
-function LPVSS(x::AbstractArray, u::AbstractArray, v::AbstractVecOrMat, nc; normalize=true, λ = 1e-3)
-    if isa(v,AbstractMatrix)
+function LPVSS(x::AbstractArray, u::AbstractArray, v::AbstractVecOrMat, nc; normalize=true, λ=1e-3)
+    if isa(v, AbstractMatrix)
         bfe  = MultiRBFE(v, nc; normalize=normalize)
     else
         bfe  = UniformRBFE(v, nc; normalize=normalize)
     end
-    params, cov, σ = fit_ss(x,u,v,bfe,λ)
+    params, cov, σ = fit_ss(x, u, v, bfe, λ)
     LPVSS(bfe, params, cov, σ)
 end
 
-function mega_regressor(bfe,v,A)
-    nc = length(bfe.μ) ÷ (ndims(v) > 1 ? size(v,2) : 1)
+function mega_regressor(bfe, v, A)
+    nc = length(bfe.μ) ÷ (ndims(v) > 1 ? size(v, 2) : 1)
     ϕ = bfe(v)
     if isa(ϕ, Vector)
         ϕ = ϕ'
     end
-    ϕ = repeat(ϕ,1,size(A,2)) # Extend activations from nc to nc×(n+m)
-    ϕ = ϕ.* repeat(A,1,nc)  # Extend regressor from n+m to nc×(n+m)
+    ϕ = repeat(ϕ, 1, size(A, 2)) # Extend activations from nc to nc×(n+m)
+    ϕ = ϕ .* repeat(A, 1, nc)  # Extend regressor from n+m to nc×(n+m)
 end
 
-shorten_v(v::AbstractVector) = v[1:end-1]
-shorten_v(v::AbstractMatrix) = v[1:end-1,:]
+shorten_v(v::AbstractVector) = v[1:end - 1]
+shorten_v(v::AbstractMatrix) = v[1:end - 1,:]
 
-function fit_ss(x,u,v,bfe,λ)
-    y,A  = matricesn(x,u) # A is sched matrix [x[1:end-1,:] u[1:end-1,:]]
-    if size(v,1) > size(A,1)
+function fit_ss(x, u, v, bfe, λ)
+    y, A  = matricesn(x, u) # A is sched matrix [x[1:end-1,:] u[1:end-1,:]]
+    if size(v, 1) > size(A, 1)
         v = shorten_v(v)
     end
-    ϕ = mega_regressor(bfe,v,A)
-    p = size(ϕ,2)
-    B = qr(λ == 0 ? ϕ : [ϕ; λ*I])
-    params = mapslices(y,dims=1) do y
+    ϕ = mega_regressor(bfe, v, A)
+    p = size(ϕ, 2)
+    B = qr(λ == 0 ? ϕ : [ϕ; λ * I])
+    params = mapslices(y, dims=1) do y
         if λ == 0
-            x = B\y
+            x = B \ y
         else
-            x = B\[y;zeros(p)]
+            x = B \ [y;zeros(p)]
         end
     end # We now have n vectors of nc(n+m) parameters = nc(n+m)×n
-    σ = [std(y[:,i] - ϕ*params[:,i]) for i =1:size(params,2)]
-    ATA = Cholesky(B.R,:U,0) # TODO: Isn't R already a cholesky factor of R'R??
-    cov = λ == 0 ? inv(ATA) : ATA\(ϕ'ϕ)/Matrix(ATA) # / not defined for factorizations https://github.com/JuliaLang/julia/issues/12436
+    σ = [std(y[:,i] - ϕ * params[:,i]) for i = 1:size(params, 2)]
+    ATA = Cholesky(B.R, :U, 0) # TODO: Isn't R already a cholesky factor of R'R??
+    cov = λ == 0 ? inv(ATA) : ATA \ (ϕ'ϕ) / Matrix(ATA) # / not defined for factorizations https://github.com/JuliaLang/julia/issues/12436
 
     # icov = cholfact(Hermitian(q))
     # icov = cholfact(Symmetric(q[:R]'q[:R]))
@@ -211,19 +211,19 @@ scheduling parameter `v`
 """
 function predict(model::LPVSS, x::AbstractMatrix, u, v=[x u])
     A = [x u]
-    ϕ = mega_regressor(model.bfe,v,A)
+    ϕ = mega_regressor(model.bfe, v, A)
     y = similar(x)
-    for i = 1:size(y,2)
-        y[:,i] = ϕ*model.params[:,i]
+    for i = 1:size(y, 2)
+        y[:,i] = ϕ * model.params[:,i]
     end
     y
 end
 
 function predict(model::LPVSS, x::AbstractVector, u, v)
     A = [x' u']
-    ϕ = mega_regressor(model.bfe,v,A)
+    ϕ = mega_regressor(model.bfe, v, A)
     y = map(1:length(x)) do i
-        vecdot(ϕ,model.params[:,i])
+        vecdot(ϕ, model.params[:,i])
     end
 end
 
@@ -251,7 +251,7 @@ provided
 """
 function output_variance(model::LPVSS, x::AbstractVector, u::AbstractVector, v=[x u])
     A = [x' u']
-    ϕ = mega_regressor(model.bfe,v,A)[:]
-    mean_var = [σ^2*ϕ'model.cov*ϕ for σ in model.σ]
+    ϕ = mega_regressor(model.bfe, v, A)[:]
+    mean_var = [σ^2 * ϕ'model.cov * ϕ for σ in model.σ]
     pred_var = [model.σ[i] + sqrt(mean_var[i]) for i = 1:length(model.σ)]
 end
