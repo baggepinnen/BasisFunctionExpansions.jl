@@ -1,7 +1,7 @@
 name = "BasisFunctionExpansions"
 uuid = "07f847a3-b39a-5451-bea0-0f0f0688aa14"
 authors = ["baggepinnen <baggepinnen@gmail.com>"]
-version = "1.1.1"
+version = "1.1.2"
 
 [deps]
 Clustering = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
